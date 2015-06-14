@@ -144,8 +144,14 @@ Handle<Value> GearmanClient::addServer(const Arguments& args) {
 Handle<Value> GearmanClient::setDebug(const Arguments& args) {
 	HandleScope scope;
 
+
+	if (!args[0]->IsBoolean()) {
+		ThrowException(Exception::TypeError(String::New("Wrong arguments")));
+		return scope.Close(Boolean::New(false));
+	}
+
 	GearmanClient* gClient = ObjectWrap::Unwrap<GearmanClient>(args.This());
-	gClient->debug = true;
+	gClient->debug = Boolean::Cast(args[0]);
 
 	return scope.Close(Boolean::New(true));
 }
