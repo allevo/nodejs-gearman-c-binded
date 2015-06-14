@@ -3,7 +3,7 @@
 
 var g = require('./index');
 var client = new g.GearmanClient();
-
+client.setDebug(true);
 var r;
 r = client.addServer('127.0.0.1', 4730);
 // console.log(r);

@@ -32,6 +32,7 @@ void GearmanClient::Init(Handle<Object> exports) {
 	tpl->InstanceTemplate()->SetInternalFieldCount(1);
 	// Prototype
 	tpl->PrototypeTemplate()->Set(String::NewSymbol("doJobBackground"), FunctionTemplate::New(doJobBackground)->GetFunction());
+	tpl->PrototypeTemplate()->Set(String::NewSymbol("setDebug"), FunctionTemplate::New(setDebug)->GetFunction());
 	tpl->PrototypeTemplate()->Set(String::NewSymbol("addServer"), FunctionTemplate::New(addServer)->GetFunction());
 
 	tpl->Set("GEARMAN_SUCCESS", Number::New(GEARMAN_SUCCESS));
@@ -151,7 +152,7 @@ Handle<Value> GearmanClient::setDebug(const Arguments& args) {
 	}
 
 	GearmanClient* gClient = ObjectWrap::Unwrap<GearmanClient>(args.This());
-	gClient->debug = Boolean::Cast(args[0]);
+	gClient->debug = (args[0])->IsTrue();
 
 	return scope.Close(Boolean::New(true));
 }
