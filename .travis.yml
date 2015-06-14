@@ -4,7 +4,7 @@ node_js:
   - "0.12"
 
 before_install:
-  - "sudo apt-get install gearman"
+  - "sudo apt-get install gearman libgearman-dev libgearman7"
 
 notifications:
   email:
