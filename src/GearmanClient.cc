@@ -23,6 +23,7 @@ std::string _MakeString(Handle<String> str) {
 GearmanClient::GearmanClient() {
 	client = gearman_client_create(NULL);
 	uv_mutex_init(&client_mutex);
+	debug = false;
 }
 
 void GearmanClient::Init(Handle<Object> exports) {
@@ -30,7 +31,6 @@ void GearmanClient::Init(Handle<Object> exports) {
 	tpl->SetClassName(String::NewSymbol("GearmanClient"));
 	tpl->InstanceTemplate()->SetInternalFieldCount(1);
 	// Prototype
-	tpl->PrototypeTemplate()->Set(String::NewSymbol("doJobBackgroundSync"), FunctionTemplate::New(doJobBackgroundSync)->GetFunction());
 	tpl->PrototypeTemplate()->Set(String::NewSymbol("doJobBackground"), FunctionTemplate::New(doJobBackground)->GetFunction());
 	tpl->PrototypeTemplate()->Set(String::NewSymbol("addServer"), FunctionTemplate::New(addServer)->GetFunction());
 
@@ -131,41 +131,37 @@ Handle<Value> GearmanClient::addServer(const Arguments& args) {
 	char* host = (char*) malloc(sizeof(char) * (strlen(hostname) + 1));
 	strcpy(host, hostname);
 	host[strlen(hostname)] = '\0';
-	printf("%s %s %d %d\n", "Add server", host, (int) strlen(host), port);
+	gClient->debug && printf("%s %s %d %d\n", "Add server", host, (int) strlen(host), port);
 
 	gearman_return_t ret = gearman_client_add_server(gClient->client, host, port);
 	if (gearman_failed(ret)) {
-		printf("ERROR: %s\n", gearman_strerror(ret));
+		gClient->debug && printf("ERROR: %s\n", gearman_strerror(ret));
 		return scope.Close(Boolean::New(false));
 	}
 	return scope.Close(Boolean::New(true));
 }
 
-gearman_return_t __doJobBackground(gearman_client_st* client, char* queue, char* id, char* data, gearman_job_handle_t handle) {
-	printf("%s %s\n", "QUEUING on ", queue);
+Handle<Value> GearmanClient::setDebug(const Arguments& args) {
+	HandleScope scope;
+
+	GearmanClient* gClient = ObjectWrap::Unwrap<GearmanClient>(args.This());
+	gClient->debug = true;
+
+	return scope.Close(Boolean::New(true));
+}
+
+
+gearman_return_t GearmanClient::__doJobBackground(gearman_client_st* client, char* queue, char* id, char* data, gearman_job_handle_t handle) {
+	this->debug && printf("%s %s\n", "QUEUING on ", queue);
 	gearman_return_t ret = gearman_client_do_background(client, queue, id, data, strlen(data),  handle);
-	printf("END queueing%s\n", handle);
+	this->debug && printf("END queueing%s\n", handle);
 
 	if (!gearman_success(ret)) {
-		printf("%s %s\n", "ERROR!!", gearman_strerror(ret));
+		this->debug && printf("%s %s\n", "ERROR!!", gearman_strerror(ret));
 	}
 
 	return ret;
 }
-
-Handle<Value> GearmanClient::doJobBackgroundSync(const Arguments& args) {
-	HandleScope scope;
-	GearmanClient* gClient = ObjectWrap::Unwrap<GearmanClient>(args.This());
-
-	gearman_job_handle_t* job_handle = (gearman_job_handle_t*) malloc(sizeof(gearman_job_handle_t) * 1);
-	uv_mutex_lock(&(client_mutex));
-	gearman_return_t ret = __doJobBackground(gClient->client, (char*) "queue", (char*) "id", (char*) "data", *job_handle);
-	uv_mutex_unlock(&(client_mutex));
-
-
-	return scope.Close(Boolean::New(gearman_success(ret)));
-}
-
 
 struct GearmanJobBaton {
 	uv_work_t work;
@@ -187,16 +183,14 @@ struct TaskBaton {
 void GearmanClient::queue_job(uv_work_t *work) {
 	TaskBaton* baton = (TaskBaton*) work->data;
 
-	printf("%s\n", "Locking...");
-	uv_mutex_lock(&(client_mutex));
-
 	GearmanTask* gTask = ObjectWrap::Unwrap<GearmanTask>(baton->t);
-
-	printf("%s\n", "DOING JOB BACKGOURND");
-	gTask->ret = __doJobBackground(gTask->client->client, (char*) "queue", NULL, (char*) "data", gTask->job_handle);
-	printf("%s\n", "Unocking...");
+	gTask->client->debug && printf("%s\n", "Locking...");
+	uv_mutex_lock(&(client_mutex));
+	gTask->client->debug && printf("%s\n", "DOING JOB BACKGOURND");
+	gTask->ret = gTask->client->__doJobBackground(gTask->client->client, (char*) "queue", NULL, (char*) "data", gTask->job_handle);
+	gTask->client->debug && printf("%s\n", "Unocking...");
 	uv_mutex_unlock(&(client_mutex));
-	printf("%s\n", "DONE");
+	gTask->client->debug && printf("%s\n", "DONE");
 }
 
 void GearmanClient::after_queue_job(uv_work_t *work, int status) {
@@ -205,14 +199,14 @@ void GearmanClient::after_queue_job(uv_work_t *work, int status) {
 	TaskBaton* baton = (TaskBaton*) work->data;
 	GearmanTask* gTask = ObjectWrap::Unwrap<GearmanTask>(baton->t);
 
-	printf("%s\n", "argv");
+	gTask->client->debug && printf("%s\n", "argv");
 	Handle<Value> argv[2] = {
 		Number::New((int) gTask->ret),
 		String::New(gTask->job_handle)
 	};
-	printf("%s %p\n", "CALLING", gTask->on_submitted_callback);
+	gTask->client->debug && printf("%s\n", "CALLING callback");
 	gTask->on_submitted_callback->Call(Context::GetCurrent()->Global(), 2, argv);
-	printf("%s\n", "CALLED");
+	gTask->client->debug && printf("%s\n", "CALLED");
 
 
 	baton->t.Dispose();
@@ -243,7 +237,7 @@ Handle<Value> GearmanClient::doJobBackground(const Arguments& args) {
 	task->client = gClient;
 
 	task->on_submitted_callback = Persistent<Function>::New(Handle<Function>::Cast(args[0]));
-	printf("%s %p\n", "CALLBACK SET", task->on_submitted_callback);
+	gClient->debug && printf("%s\n", "CALLBACK SET");
 
 	baton->work.data = (void*) baton;
 	uv_queue_work(uv_default_loop(), &(baton->work), GearmanClient::queue_job, GearmanClient::after_queue_job);

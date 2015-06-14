@@ -58,7 +58,6 @@ Handle<Value> GearmanTask::onSubmitted(const Arguments& args) {
 }
 
 void GearmanTask::_onSubmitted() {
-	printf("CALLING ON SUBMITTED CALLBACK %p\n", Context::GetCurrent()->Global());
 	Handle<Value> argv[0] = {};
 
 	this->on_submitted_callback->Call(Context::GetCurrent()->Global(), 0, argv);
