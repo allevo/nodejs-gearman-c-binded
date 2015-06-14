@@ -3,9 +3,6 @@
 #define BUILDING_NODE_EXTENSION
 #endif
 
-class GearmanClient;
-class GearmanTask;
-
 
 #include "GearmanClient.h"
 #include "GearmanTask.h"

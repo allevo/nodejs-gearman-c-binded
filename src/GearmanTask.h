@@ -12,6 +12,8 @@ using namespace node;
 #include <set>
 using namespace std;
 
+class GearmanClient;
+
 
 class GearmanTask : ObjectWrap {
 public:
