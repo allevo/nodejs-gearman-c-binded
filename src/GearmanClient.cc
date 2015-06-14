@@ -134,7 +134,7 @@ Handle<Value> GearmanClient::addServer(const Arguments& args) {
 	char* hostname = (char*) _MakeString(args[0]->ToString()).c_str();
 	int port = Int32::Cast(*(args[1]))->Value();
 	
-	char* host = (char*) std::malloc(sizeof(char) * (strlen(hostname) + 1));
+	char* host = (char*) malloc(sizeof(char) * (strlen(hostname) + 1));
 	strcpy(host, hostname);
 	host[strlen(hostname)] = '\0';
 	gClient->debug && printf("%s %s %d %d\n", "Add server", host, (int) strlen(host), port);
