@@ -4,6 +4,7 @@
 
 #include <node.h>
 using namespace v8;
+using namespace node;
 
 #include <libgearman/gearman.h>
 
@@ -14,7 +15,7 @@ using namespace std;
 class GearmanClient;
 
 
-class GearmanTask: public node::ObjectWrap {
+class GearmanTask : ObjectWrap {
 public:
 	static Persistent<Function> constructor;
 	static void Init(Handle<Object> exports);

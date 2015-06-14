@@ -4,6 +4,7 @@
 
 #include <node.h>
 using namespace v8;
+using namespace node;
 
 #include <libgearman/gearman.h>
 
@@ -11,8 +12,7 @@ using namespace v8;
 #include <set>
 using namespace std;
 
-
-class GearmanClient: public node::ObjectWrap {
+class GearmanClient : ObjectWrap {
 public:
 	static Persistent<Function> constructor;
 	static void Init(Handle<Object> exports);

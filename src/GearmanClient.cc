@@ -6,6 +6,7 @@
 #include <string>
 #include <string.h>
 #include <unistd.h>
+#include <cstdio>
 
 
 Persistent<Function> GearmanClient::constructor;
