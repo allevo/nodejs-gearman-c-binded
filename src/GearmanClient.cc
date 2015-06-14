@@ -86,9 +86,13 @@ void GearmanClient::Init(Handle<Object> exports) {
 	tpl->Set("GEARMAN_ARGUMENT_TOO_LARGE", Number::New(GEARMAN_ARGUMENT_TOO_LARGE));
 	tpl->Set("GEARMAN_INVALID_ARGUMENT", Number::New(GEARMAN_INVALID_ARGUMENT));
 	tpl->Set("GEARMAN_IN_PROGRESS", Number::New(GEARMAN_IN_PROGRESS));
+#ifdef GEARMAN_INVALID_SERVER_OPTION
 	tpl->Set("GEARMAN_INVALID_SERVER_OPTION", Number::New(GEARMAN_INVALID_SERVER_OPTION));
+#endif
 	tpl->Set("GEARMAN_MAX_RETURN", Number::New(GEARMAN_MAX_RETURN));
+#ifdef GEARMAN_FAIL
 	tpl->Set("GEARMAN_FAIL", Number::New(GEARMAN_FAIL));
+#endif
 	tpl->Set("GEARMAN_FATAL", Number::New(GEARMAN_FATAL));
 	tpl->Set("GEARMAN_ERROR", Number::New(GEARMAN_ERROR));
 
@@ -129,7 +133,7 @@ Handle<Value> GearmanClient::addServer(const Arguments& args) {
 	char* hostname = (char*) _MakeString(args[0]->ToString()).c_str();
 	int port = Int32::Cast(*(args[1]))->Value();
 	
-	char* host = (char*) malloc(sizeof(char) * (strlen(hostname) + 1));
+	char* host = (char*) std::malloc(sizeof(char) * (strlen(hostname) + 1));
 	strcpy(host, hostname);
 	host[strlen(hostname)] = '\0';
 	gClient->debug && printf("%s %s %d %d\n", "Add server", host, (int) strlen(host), port);
