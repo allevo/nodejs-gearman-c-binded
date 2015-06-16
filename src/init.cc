@@ -5,10 +5,12 @@
 
 
 #include "GearmanClient.h"
+#include "MultipleTask.h"
 
 
 void InitAll(Handle<Object> exports, Handle<Object> module) {
 	GearmanClient::Init(exports);
+	MultipleTask::Init(exports);
 }
 
 NODE_MODULE(gearmannodeCBinded, InitAll)
