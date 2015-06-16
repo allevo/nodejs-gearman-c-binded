@@ -12,7 +12,7 @@ using namespace node;
 #include <set>
 using namespace std;
 
-class GearmanClient : ObjectWrap {
+class GearmanClient : public ObjectWrap {
 public:
 	static Persistent<FunctionTemplate> constructor;
 	static void Init(Handle<Object> exports);

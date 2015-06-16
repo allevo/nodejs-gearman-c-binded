@@ -3,7 +3,6 @@
 TOOLSET := target
 TARGET := gearmannodeCBinded
 DEFS_Debug := \
-	'-DNODE_GYP_MODULE_NAME=gearmannodeCBinded' \
 	'-D_LARGEFILE_SOURCE' \
 	'-D_FILE_OFFSET_BITS=64' \
 	'-DBUILDING_NODE_EXTENSION' \
@@ -13,10 +12,10 @@ DEFS_Debug := \
 # Flags passed to all source files.
 CFLAGS_Debug := \
 	-fPIC \
+	-pthread \
 	-Wall \
 	-Wextra \
 	-Wno-unused-parameter \
-	-pthread \
 	-m64 \
 	-g \
 	-O0
@@ -30,13 +29,12 @@ CFLAGS_CC_Debug := \
 	-fno-exceptions
 
 INCS_Debug := \
-	-I/home/vagrant/.node-gyp/0.10.25/src \
-	-I/home/vagrant/.node-gyp/0.10.25/deps/uv/include \
-	-I/home/vagrant/.node-gyp/0.10.25/deps/v8/include \
+	-I/home/vagrant/.node-gyp/0.12.4/src \
+	-I/home/vagrant/.node-gyp/0.12.4/deps/uv/include \
+	-I/home/vagrant/.node-gyp/0.12.4/deps/v8/include \
 	-I$(srcdir)/node_modules/nan
 
 DEFS_Release := \
-	'-DNODE_GYP_MODULE_NAME=gearmannodeCBinded' \
 	'-D_LARGEFILE_SOURCE' \
 	'-D_FILE_OFFSET_BITS=64' \
 	'-DBUILDING_NODE_EXTENSION'
@@ -44,14 +42,16 @@ DEFS_Release := \
 # Flags passed to all source files.
 CFLAGS_Release := \
 	-fPIC \
+	-pthread \
 	-Wall \
 	-Wextra \
 	-Wno-unused-parameter \
-	-pthread \
 	-m64 \
-	-O2 \
-	-fno-strict-aliasing \
+	-O3 \
+	-ffunction-sections \
+	-fdata-sections \
 	-fno-tree-vrp \
+	-fno-tree-sink \
 	-fno-omit-frame-pointer
 
 # Flags passed to only C files.
@@ -63,9 +63,9 @@ CFLAGS_CC_Release := \
 	-fno-exceptions
 
 INCS_Release := \
-	-I/home/vagrant/.node-gyp/0.10.25/src \
-	-I/home/vagrant/.node-gyp/0.10.25/deps/uv/include \
-	-I/home/vagrant/.node-gyp/0.10.25/deps/v8/include \
+	-I/home/vagrant/.node-gyp/0.12.4/src \
+	-I/home/vagrant/.node-gyp/0.12.4/deps/uv/include \
+	-I/home/vagrant/.node-gyp/0.12.4/deps/v8/include \
 	-I$(srcdir)/node_modules/nan
 
 OBJS := \

@@ -105,7 +105,7 @@ void GearmanClient::Init(Handle<Object> exports) {
 	*/
 }
 
-Handle<Value> GearmanClient::New(const Arguments& args) {
+NAN_METHOD(GearmanClient::New) {
     NanScope();
 
     if (!args.IsConstructCall()) {
