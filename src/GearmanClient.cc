@@ -1,7 +1,7 @@
 
 
 #include "GearmanClient.h"
-#include "GearmanTask.h"
+#include "ExecuteTask.h"
 
 #include <string>
 #include <cstring>
@@ -11,7 +11,7 @@ using namespace std;
 
 
 
-Persistent<Function> GearmanClient::constructor;
+Persistent<FunctionTemplate> GearmanClient::constructor;
 
 
 uv_mutex_t client_mutex;
@@ -30,14 +30,18 @@ GearmanClient::GearmanClient() {
 }
 
 void GearmanClient::Init(Handle<Object> exports) {
-	Local<FunctionTemplate> tpl = FunctionTemplate::New(New);
-	tpl->SetClassName(String::NewSymbol("GearmanClient"));
-	tpl->InstanceTemplate()->SetInternalFieldCount(1);
-	// Prototype
-	tpl->PrototypeTemplate()->Set(String::NewSymbol("doJobBackground"), FunctionTemplate::New(doJobBackground)->GetFunction());
-	tpl->PrototypeTemplate()->Set(String::NewSymbol("setDebug"), FunctionTemplate::New(setDebug)->GetFunction());
-	tpl->PrototypeTemplate()->Set(String::NewSymbol("addServer"), FunctionTemplate::New(addServer)->GetFunction());
+	NanScope();
+	Local<FunctionTemplate> t = NanNew<FunctionTemplate>(New);
+	t->InstanceTemplate()->SetInternalFieldCount(1);
+	t->SetClassName(NanNew("GearmanClient"));
+	NODE_SET_PROTOTYPE_METHOD(t, "doJobBackground", doJobBackground);
+	NODE_SET_PROTOTYPE_METHOD(t, "setDebug", setDebug);
+	NODE_SET_PROTOTYPE_METHOD(t, "addServer", addServer);
 
+	NanAssignPersistent(constructor, t);
+	exports->Set(NanNew("GearmanClient"), t->GetFunction());
+
+	/*
 	tpl->Set("GEARMAN_SUCCESS", Number::New(GEARMAN_SUCCESS));
 	tpl->Set("GEARMAN_IO_WAIT", Number::New(GEARMAN_IO_WAIT));
 	tpl->Set("GEARMAN_SHUTDOWN", Number::New(GEARMAN_SHUTDOWN));
@@ -98,163 +102,82 @@ void GearmanClient::Init(Handle<Object> exports) {
 #endif
 	tpl->Set("GEARMAN_FATAL", Number::New(GEARMAN_FATAL));
 	tpl->Set("GEARMAN_ERROR", Number::New(GEARMAN_ERROR));
-
-
-	constructor = Persistent<Function>::New(tpl->GetFunction());
-	exports->Set(String::NewSymbol("GearmanClient"), constructor);
+	*/
 }
 
 Handle<Value> GearmanClient::New(const Arguments& args) {
-	HandleScope scope;
+    NanScope();
 
-	if (args.IsConstructCall()) {
-		GearmanClient* obj = new GearmanClient();
-		obj->Wrap(args.
-			This());
-		return args.This();
-	} else {
-		const int argc = 0;
-		Local<Value> argv[argc] = { };
-		return scope.Close(constructor->NewInstance(argc, argv));
-	}
-}
-
-Handle<Value> GearmanClient::addServer(const Arguments& args) {
-	HandleScope scope;
-
-	GearmanClient* gClient = ObjectWrap::Unwrap<GearmanClient>(args.This());
-
-	if (!args[0]->IsString()) {
-		ThrowException(Exception::TypeError(String::New("Wrong arguments")));
-		return scope.Close(Boolean::New(false));
-	}
-	if (!args[1]->IsNumber()) {
-		ThrowException(Exception::TypeError(String::New("Wrong arguments")));
-		return scope.Close(Boolean::New(false));
-	}
-
-	char* hostname = (char*) _MakeString(args[0]->ToString()).c_str();
-	int port = Int32::Cast(*(args[1]))->Value();
-	
-	char* host = new char[strlen(hostname) + 1];
-	strcpy(host, hostname);
-	host[strlen(hostname)] = '\0';
-	gClient->debug && printf("%s %s %d %d\n", "Add server", host, (int) strlen(host), port);
-
-	gearman_return_t ret = gearman_client_add_server(gClient->client, host, port);
-	if (gearman_failed(ret)) {
-		gClient->debug && printf("ERROR: %s\n", gearman_strerror(ret));
-		return scope.Close(Boolean::New(false));
-	}
-	return scope.Close(Boolean::New(true));
-}
-
-Handle<Value> GearmanClient::setDebug(const Arguments& args) {
-	HandleScope scope;
-
-
-	if (!args[0]->IsBoolean()) {
-		ThrowException(Exception::TypeError(String::New("Wrong arguments")));
-		return scope.Close(Boolean::New(false));
-	}
-
-	GearmanClient* gClient = ObjectWrap::Unwrap<GearmanClient>(args.This());
-	gClient->debug = (args[0])->IsTrue();
-
-	return scope.Close(Boolean::New(true));
-}
-
-
-gearman_return_t GearmanClient::__doJobBackground(gearman_client_st* client, char* queue, char* id, char* data, gearman_job_handle_t handle) {
-	this->debug && printf("%s %s\n", "QUEUING on ", queue);
-	gearman_return_t ret = gearman_client_do_background(client, queue, id, data, strlen(data),  handle);
-	this->debug && printf("END queueing%s\n", handle);
-
-	if (!gearman_success(ret)) {
-		this->debug && printf("%s %s\n", "ERROR!!", gearman_strerror(ret));
-	}
-
-	return ret;
-}
-
-struct GearmanJobBaton {
-	uv_work_t work;
-	char* queue;
-	char* id;
-	char* data;
-	gearman_job_handle_t handler;
-	gearman_return_t ret;
-	GearmanClient* client;
-};
-
-
-struct TaskBaton {
-	// wrap around task
-	Persistent<Object> t;
-	uv_work_t work;
-};
-
-void GearmanClient::queue_job(uv_work_t *work) {
-	TaskBaton* baton = (TaskBaton*) work->data;
-
-	GearmanTask* gTask = ObjectWrap::Unwrap<GearmanTask>(baton->t);
-	gTask->client->debug && printf("%s\n", "Locking...");
-	uv_mutex_lock(&(client_mutex));
-	gTask->client->debug && printf("%s\n", "DOING JOB BACKGOURND");
-	gTask->ret = gTask->client->__doJobBackground(gTask->client->client, (char*) "queue", NULL, (char*) "data", gTask->job_handle);
-	gTask->client->debug && printf("%s\n", "Unocking...");
-	uv_mutex_unlock(&(client_mutex));
-	gTask->client->debug && printf("%s\n", "DONE");
-}
-
-void GearmanClient::after_queue_job(uv_work_t *work, int status) {
-	HandleScope scope;
-
-	TaskBaton* baton = (TaskBaton*) work->data;
-	GearmanTask* gTask = ObjectWrap::Unwrap<GearmanTask>(baton->t);
-
-	gTask->client->debug && printf("%s\n", "argv");
-	Handle<Value> argv[2] = {
-		Number::New((int) gTask->ret),
-		String::New(gTask->job_handle)
-	};
-	gTask->client->debug && printf("%s\n", "CALLING callback");
-	gTask->on_submitted_callback->Call(Context::GetCurrent()->Global(), 2, argv);
-	gTask->client->debug && printf("%s\n", "CALLED");
-
-
-	baton->t.Dispose();
-	baton->t.Clear();
-
-	delete baton;
-	scope.Close(Undefined());
-}
-
-Handle<Value> GearmanClient::doJobBackground(const Arguments& args) {
-	HandleScope scope;
-
-
-	if (!args[0]->IsFunction()) {
-		scope.Close(Undefined());
-        return ThrowException(Exception::TypeError(String::New("Wrong arguments")));
+    if (!args.IsConstructCall()) {
+		return NanThrowTypeError("Use the new operator to create new GearmanClient objects");
     }
-    
+
+	GearmanClient* gClient = new GearmanClient();
+    gClient->Wrap(args.This());
+
+    NanReturnValue(args.This());
+}
+
+NAN_METHOD(GearmanClient::addServer) {
+    NanScope();
+
+    if (args.Length() <= 0 || !args[0]->IsString()) {
+        return NanThrowTypeError("Argument 0 must be a string");
+    }
+    String::Utf8Value str(args[0]->ToString());
+    if (args.Length() <= 1 || !args[1]->IsUint32()) {
+    	return NanThrowTypeError("Argument 1 must be a integer");
+    }
+    int port = args[1]->Int32Value();
+
+    char* host = new char[str.length()];
+    strcpy(host, *str);
+
+    GearmanClient* gClient = ObjectWrap::Unwrap<GearmanClient>(args.This());
+
+    gClient->debug && printf("%s %s %d\n", "addServer", *str, port);
+    gearman_client_add_server(gClient->client, host, (in_port_t) port);
+
+	NanReturnValue(NanNew<Boolean>(true));
+}
+
+NAN_METHOD(GearmanClient::setDebug) {
+    NanScope();
+
 	GearmanClient* gClient = ObjectWrap::Unwrap<GearmanClient>(args.This());
-	
-	TaskBaton* baton = new TaskBaton();
-	baton->t = Persistent<Object>::New(GearmanTask::constructor->NewInstance());
-	GearmanTask* task = ObjectWrap::Unwrap<GearmanTask>(baton->t);
+    if (args.Length() == 1) {
+        gClient->debug = args[1]->BooleanValue();
+    }
 
-	task->data = (char*) "data";
-	task->unique = NULL;
-	task->queue = (char*) "queue";
-	task->client = gClient;
+	NanReturnValue(NanNew<Boolean>(true));
+}
 
-	task->on_submitted_callback = Persistent<Function>::New(Handle<Function>::Cast(args[0]));
-	gClient->debug && printf("%s\n", "CALLBACK SET");
+NAN_METHOD(GearmanClient::doJobBackground) {
+    NanScope();
 
-	baton->work.data = (void*) baton;
-	uv_queue_work(uv_default_loop(), &(baton->work), GearmanClient::queue_job, GearmanClient::after_queue_job);
 
-	return scope.Close(Undefined());
+    if (args.Length() <= 0 || !args[0]->IsString()) {
+        return NanThrowTypeError("Argument 0 must be a string");
+    }
+    String::Utf8Value queue(args[0]->ToString());
+
+    if (args.Length() <= 1 || !args[1]->IsString()) {
+        return NanThrowTypeError("Argument 1 must be a string");
+    }
+    String::Utf8Value data(args[1]->ToString());
+
+    if (args.Length() <= 2 || !args[2]->IsString()) {
+        return NanThrowTypeError("Argument 2 must be a string");
+    }
+    String::Utf8Value unique(args[2]->ToString());
+
+    if (args.Length() <= 3 || !args[3]->IsFunction()) {
+        return NanThrowTypeError("Argument 3 must be a function");
+    }
+	NanCallback *callback = new NanCallback(args[3].As<Function>());
+
+    GearmanClient* gClient = ObjectWrap::Unwrap<GearmanClient>(args.This());
+
+	NanAsyncQueueWorker(new ExecuteTask(gClient, callback, *queue, *data, *unique));
+	NanReturnUndefined();
 }

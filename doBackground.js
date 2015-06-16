@@ -4,21 +4,12 @@
 var g = require('./index');
 var client = new g.GearmanClient();
 client.setDebug(true);
-var r;
-r = client.addServer('127.0.0.1', 4730);
-// console.log(r);
+client.addServer('127.0.0.1', 4730);
 
+client.doJobBackground('queue', 'data', 'unique', function() {
+  console.log('submited', arguments);
+});
 
-// client.start();
-
-// r = client.doJobBackgroundSync();
-
-
-var n = 0;
-var id = setInterval(function() {
-  n++;
-  client.doJobBackground(function(status, handler) {
-    console.log("AAAAAAAA SUBMITTED", status === g.GearmanClient.GEARMAN_SUCCESS, handler);
-  });
-
-}, 50);
+setTimeout(function() {
+  console.log('AAA');
+}, 100);

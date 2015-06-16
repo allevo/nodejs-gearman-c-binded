@@ -32,7 +32,8 @@ CFLAGS_CC_Debug := \
 INCS_Debug := \
 	-I/home/vagrant/.node-gyp/0.10.25/src \
 	-I/home/vagrant/.node-gyp/0.10.25/deps/uv/include \
-	-I/home/vagrant/.node-gyp/0.10.25/deps/v8/include
+	-I/home/vagrant/.node-gyp/0.10.25/deps/v8/include \
+	-I$(srcdir)/node_modules/nan
 
 DEFS_Release := \
 	'-DNODE_GYP_MODULE_NAME=gearmannodeCBinded' \
@@ -64,12 +65,12 @@ CFLAGS_CC_Release := \
 INCS_Release := \
 	-I/home/vagrant/.node-gyp/0.10.25/src \
 	-I/home/vagrant/.node-gyp/0.10.25/deps/uv/include \
-	-I/home/vagrant/.node-gyp/0.10.25/deps/v8/include
+	-I/home/vagrant/.node-gyp/0.10.25/deps/v8/include \
+	-I$(srcdir)/node_modules/nan
 
 OBJS := \
 	$(obj).target/$(TARGET)/src/init.o \
-	$(obj).target/$(TARGET)/src/GearmanClient.o \
-	$(obj).target/$(TARGET)/src/GearmanTask.o
+	$(obj).target/$(TARGET)/src/GearmanClient.o
 
 # Add to the list of files we specially track dependencies for.
 all_deps += $(OBJS)

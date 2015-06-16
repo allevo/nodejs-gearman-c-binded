@@ -6,6 +6,7 @@
   "dependencies": {
     "async": "^1.2.1",
     "gearmanode": "^0.2.2",
+    "nan": "^1.8.4",
     "node-gyp": "^2.0.1"
   },
   "devDependencies": {
