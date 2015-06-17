@@ -13,7 +13,7 @@ function startGearmanServer(done) {
     }
     if (!alreadyCalled) {
       alreadyCalled = true;
-      return done(context === 'exit' ? arguments : undefined);
+      setTimeout(done.bind(null, context === 'exit' ? arguments : undefined), 100);
     }
   }
   gearmanProcess.stdout.on('data', cb.bind(null, 'stdout'));
