@@ -62,7 +62,7 @@ NAN_METHOD(MultipleTask::addJobBackground) {
 	if (args.Length() <= 3 || !args[3]->IsString()) {
 		return NanThrowTypeError("Argument 3 must be a string");
 	}
-	String::Utf8Value unique(args[2]->ToString());
+	String::Utf8Value name(args[2]->ToString());
 
 	MultipleTask* mTask = ObjectWrap::Unwrap<MultipleTask>(args.This());
 
