@@ -13,7 +13,7 @@ describe('module', function () {
   });
 
   it('should export LIBGEARMAN_VERSION_STRING', function () {
-    assert.ok(cBinded.LIBGEARMAN_VERSION_STRING.match(/\d+\.\d+.\d+/));
+    assert.ok(cBinded.LIBGEARMAN_VERSION_STRING.match(/\d+\.\d+(.\d+)?/));
   });
 
   it('should export LIBGEARMAN_VERSION_HEX', function () {
