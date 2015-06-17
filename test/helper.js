@@ -8,15 +8,20 @@ function startGearmanServer(done) {
   gearmanProcess = child_process.spawn('gearmand', ['--port', '4731', '--verbose', 'DEBUG', '--log-file', 'stderr']);
   var alreadyCalled = false;
   function cb(context, data) {
-    if (~['stdout', 'stderr'].indexOf(context)) {
-      console.log(data.toString());
+    if ('stderr' === context) {
+      // console.log(data.toString());
     }
     if (!alreadyCalled) {
-      alreadyCalled = true;
-      setTimeout(done.bind(null, context === 'exit' ? arguments : undefined), 100);
+      if (context === 'stderr' && data.toString().match(/replaying queue: end/)) {
+        alreadyCalled = true;
+        setTimeout(done, 0);
+      }
+      if (context === 'exit') {
+        alreadyCalled = true;
+        setTimeout(done.bind(null, new Error('gearman exited too early' + JSON.stringify(arguments))), 0);
+      }
     }
   }
-  gearmanProcess.stdout.on('data', cb.bind(null, 'stdout'));
   gearmanProcess.stderr.on('data', cb.bind(null, 'stderr'));
   gearmanProcess.on('exit', cb.bind(null, 'exit'));
 }
@@ -26,13 +31,24 @@ function stopGearmanServer(done) {
     return done();
   }
   gearmanProcess.on('exit', function() {
-    console.log(arguments);
     done();
   });
   gearmanProcess.kill('SIGKILL');
 }
 
+function readAllJobs(queue, callback) {
+  var readProcess = child_process.spawn('php', [__dirname + '/../read.php', queue]);
+  var d = '';
+  readProcess.stdout.on('data', function(data) {
+    d += data.toString();
+  });
+  readProcess.on('exit', function() {
+    callback(null, d.split('\n').map(JSON.parse.bind(JSON)));
+  });
+}
+
 module.exports = {
   startGearmanServer: startGearmanServer,
   stopGearmanServer: stopGearmanServer,
+  readAllJobs: readAllJobs,
 };

@@ -2,12 +2,17 @@
 
 
 $worker = new GearmanWorker();
-$worker->addServer('127.0.0.1', 4730);
+$worker->addServer('127.0.0.1', 4731);
 
 function p($job) {
-	var_dump($job->handle(), $job->workload());
+	echo json_encode(array(
+		'func' => 'queue',
+		'handler' => $job->handle(),
+		'workload' => $job->workload(),
+		'unique' => $job->unique(),
+	));
 }
 
-$worker->addFunction('queue', 'p');
-
-$worker->work();
+$worker->addFunction($argv[1], 'p');
+$worker->setTimeout(100);
+while($worker->work());
