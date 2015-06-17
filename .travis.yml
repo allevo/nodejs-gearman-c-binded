@@ -8,6 +8,7 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install gearman-job-server libgearman-dev php5 php5-json php-pear php5-dev
   - sudo pecl install gearman
+  - echo "extension=gearman.so" >> `php --ini | grep "Loaded Configuration" | sed -e "s|.*:\s*||"`
   - gearmand --help
   - gearmand --version
 
