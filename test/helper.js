@@ -5,7 +5,7 @@ var child_process = require('child_process');
 
 var gearmanProcess;
 function startGearmanServer(done) {
-  gearmanProcess = child_process.spawn('gearmand', ['--port', '4731', '--verbose', 'DEBUG', '--log-file', 'stderr']);
+  gearmanProcess = child_process.spawn('gearmand', ['--port', '4731', '--verbose', 'vvvvv', '--log-file', 'stderr']);
   var alreadyCalled = false;
   function cb(context, data) {
     if (~['stdout', 'stderr'].indexOf(context)) {
