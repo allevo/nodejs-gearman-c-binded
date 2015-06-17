@@ -1,34 +1,15 @@
 'use strict';
 
 var assert = require('assert');
-var child_process = require('child_process');
 
+var helper = require('./helper');
 var cBinded = require('../index');
 var GearmanClient = cBinded.GearmanClient;
 
 var gearmanProcess;
 describe('client', function (done) {
-  beforeEach(function() {
-    gearmanProcess = child_process.spawn('gearmand', ['--port', '4731', '--verbose', 'DEBUG']);
-    var alreadyCalled = false;
-    gearmanProcess.stdout.on('data', function() {
-      if (!alreadyCalled) {
-        alreadyCalled = true;
-        done();
-      }
-      alreadyCalled = true;
-    });
-  });
-  afterEach(function(done) {
-    if (!gearmanProcess) {
-      return done();
-    }
-    gearmanProcess.on('exit', function() {
-      console.log(arguments);
-      done();
-    });
-    gearmanProcess.kill('SIGKILL');
-  });
+  beforeEach(helper.startGearmanServer);
+  afterEach(helper.stopGearmanServer);
   describe('doBackground', function() {
     it('should store the data on gearman', function (done) {
       var client = new GearmanClient();

@@ -6,9 +6,6 @@ node_js:
 before_install:
   - sudo apt-get install gearman libgearman-dev
 
-before_script:
-  - /usr/local/sbin/gearmand --daemon --port 4731
-
 notifications:
   email:
     recipients:
