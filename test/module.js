@@ -7,8 +7,45 @@ var cBinded = require('../index');
 describe('module', function () {
   describe('strerror', function () {
     it('should be a function', function () {
+      assert.equal(Function, cBinded.strerror.constructor);
+    });
+
+    it('should return correct value', function () {
       assert.equal('GEARMAN_SUCCESS', cBinded.strerror(cBinded.GEARMAN_SUCCESS));
       assert.equal('GEARMAN_IO_WAIT', cBinded.strerror(cBinded.GEARMAN_IO_WAIT));
+    });
+  });
+
+  describe('gearman_success', function () {
+    it('should be a function', function () {
+      assert.equal(Function, cBinded.gearman_success.constructor);
+    });
+
+    it('should return correct value', function () {
+      assert.equal(true, cBinded.gearman_success(cBinded.GEARMAN_SUCCESS));
+      assert.equal(false, cBinded.gearman_success(cBinded.GEARMAN_TIMEOUT));
+    });
+  });
+
+  describe('gearman_failed', function () {
+    it('should be a function', function () {
+      assert.equal(Function, cBinded.gearman_failed.constructor);
+    });
+
+    it('should return correct value', function () {
+      assert.equal(false, cBinded.gearman_failed(cBinded.GEARMAN_SUCCESS));
+      assert.equal(true, cBinded.gearman_failed(cBinded.GEARMAN_TIMEOUT));
+    });
+  });
+
+  describe('gearman_continue', function () {
+    it('should be a function', function () {
+      assert.equal(Function, cBinded.gearman_continue.constructor);
+    });
+
+    it('should return correct value', function () {
+      assert.equal(false, cBinded.gearman_continue(cBinded.GEARMAN_SUCCESS));
+      assert.equal(false, cBinded.gearman_continue(cBinded.GEARMAN_TIMEOUT));
     });
   });
 
