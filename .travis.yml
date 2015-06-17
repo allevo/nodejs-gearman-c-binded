@@ -5,6 +5,7 @@ node_js:
 
 before_install:
   - sudo apt-get install gearman-job-server libgearman-dev
+  - gearmand --help
 
 notifications:
   email:
