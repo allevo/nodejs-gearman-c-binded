@@ -43,7 +43,13 @@ function readAllJobs(queue, callback) {
     d += data.toString();
   });
   readProcess.on('exit', function() {
-    callback(null, d.split('\n').map(JSON.parse.bind(JSON)));
+    try {
+      var parsed = d.split('\n').map(JSON.parse.bind(JSON));
+      callback(null, parsed);
+    } catch (e) {
+      console.log(d);
+      callback(e)
+    }
   });
 }
 
