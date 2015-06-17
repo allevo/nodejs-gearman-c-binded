@@ -8,6 +8,7 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install gearman-job-server libgearman-dev
   - gearmand --help
+  - gearmand --version
 
 notifications:
   email:
