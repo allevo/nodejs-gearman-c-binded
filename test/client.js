@@ -11,7 +11,7 @@ describe('client', function () {
       var client = new GearmanClient();
       client.addServer('127.0.0.1', 4730);
       client.doJobBackground('queue', 'data', 'unique', function(status, handler) {
-        assert.equal(0, status);
+        assert.equal(cBinded.GEARMAN_SUCCESS, status);
         assert.equal(String, handler.constructor);
         done();
       });
@@ -26,13 +26,6 @@ describe('client', function () {
       var mTask = client.getMultipleTask();
 
       assert.equal(cBinded.MultipleTask, mTask.constructor);
-    });
-  });
-
-  describe('constant', function () {
-    it('should be set correctly', function () {
-      assert.equal(GearmanClient.GEARMAN_SUCCESS, 0);
-      assert.equal(GearmanClient.GEARMAN_IO_WAIT, 1);
     });
   });
 });

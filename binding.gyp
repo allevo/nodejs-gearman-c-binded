@@ -2,7 +2,12 @@
   "targets": [
     {
       "target_name": "gearmannodeCBinded",
-      "sources": [ "src/init.cc", "src/GearmanClient.cc", "src/MultipleTask.cc" ],
+      "sources": [
+      	"src/init.cc",
+      	"src/GearmanClient.cc",
+      	"src/MultipleTask.cc",
+      	"src/functions.cc"
+      ],
       "link_settings": {
           "libraries": [
               "-lgearman"

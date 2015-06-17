@@ -316,8 +316,8 @@ ifeq ($(strip $(foreach prefix,$(NO_LOAD),\
 endif
 
 quiet_cmd_regen_makefile = ACTION Regenerating $@
-cmd_regen_makefile = cd $(srcdir); /home/vagrant/.nvm/v0.10.35/lib/node_modules/npm/node_modules/node-gyp/gyp/gyp_main.py -fmake --ignore-environment "--toplevel-dir=." -I/documents/nodejs-gearman-c-binded/build/config.gypi -I/home/vagrant/.nvm/v0.10.35/lib/node_modules/npm/node_modules/node-gyp/addon.gypi -I/home/vagrant/.node-gyp/0.10.35/common.gypi "--depth=." "-Goutput_dir=." "--generator-output=build" "-Dlibrary=shared_library" "-Dvisibility=default" "-Dnode_root_dir=/home/vagrant/.node-gyp/0.10.35" "-Dmodule_root_dir=/documents/nodejs-gearman-c-binded" binding.gyp
-Makefile: $(srcdir)/../../home/vagrant/.nvm/v0.10.35/lib/node_modules/npm/node_modules/node-gyp/addon.gypi $(srcdir)/../../home/vagrant/.node-gyp/0.10.35/common.gypi $(srcdir)/build/config.gypi $(srcdir)/binding.gyp
+cmd_regen_makefile = cd $(srcdir); /home/tommaso/.nvm/versions/node/v0.12.4/lib/node_modules/npm/node_modules/node-gyp/gyp/gyp_main.py -fmake --ignore-environment "--toplevel-dir=." -I/home/tommaso/repos/nodejs-gearman-c-binded/build/config.gypi -I/home/tommaso/.nvm/versions/node/v0.12.4/lib/node_modules/npm/node_modules/node-gyp/addon.gypi -I/home/tommaso/.node-gyp/0.12.4/common.gypi "--depth=." "-Goutput_dir=." "--generator-output=build" "-Dlibrary=shared_library" "-Dvisibility=default" "-Dnode_root_dir=/home/tommaso/.node-gyp/0.12.4" "-Dmodule_root_dir=/home/tommaso/repos/nodejs-gearman-c-binded" binding.gyp
+Makefile: $(srcdir)/../../.node-gyp/0.12.4/common.gypi $(srcdir)/../../.nvm/versions/node/v0.12.4/lib/node_modules/npm/node_modules/node-gyp/addon.gypi $(srcdir)/build/config.gypi $(srcdir)/binding.gyp
 	$(call do_cmd,regen_makefile)
 
 # "all" is a concatenation of the "all" targets from all the included

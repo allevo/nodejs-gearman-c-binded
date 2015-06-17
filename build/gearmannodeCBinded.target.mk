@@ -12,10 +12,10 @@ DEFS_Debug := \
 # Flags passed to all source files.
 CFLAGS_Debug := \
 	-fPIC \
+	-pthread \
 	-Wall \
 	-Wextra \
 	-Wno-unused-parameter \
-	-pthread \
 	-m64 \
 	-g \
 	-O0
@@ -29,9 +29,9 @@ CFLAGS_CC_Debug := \
 	-fno-exceptions
 
 INCS_Debug := \
-	-I/home/vagrant/.node-gyp/0.10.35/src \
-	-I/home/vagrant/.node-gyp/0.10.35/deps/uv/include \
-	-I/home/vagrant/.node-gyp/0.10.35/deps/v8/include \
+	-I/home/tommaso/.node-gyp/0.12.4/src \
+	-I/home/tommaso/.node-gyp/0.12.4/deps/uv/include \
+	-I/home/tommaso/.node-gyp/0.12.4/deps/v8/include \
 	-I$(srcdir)/node_modules/nan
 
 DEFS_Release := \
@@ -42,13 +42,14 @@ DEFS_Release := \
 # Flags passed to all source files.
 CFLAGS_Release := \
 	-fPIC \
+	-pthread \
 	-Wall \
 	-Wextra \
 	-Wno-unused-parameter \
-	-pthread \
 	-m64 \
-	-O2 \
-	-fno-strict-aliasing \
+	-O3 \
+	-ffunction-sections \
+	-fdata-sections \
 	-fno-tree-vrp \
 	-fno-tree-sink \
 	-fno-omit-frame-pointer
@@ -62,15 +63,16 @@ CFLAGS_CC_Release := \
 	-fno-exceptions
 
 INCS_Release := \
-	-I/home/vagrant/.node-gyp/0.10.35/src \
-	-I/home/vagrant/.node-gyp/0.10.35/deps/uv/include \
-	-I/home/vagrant/.node-gyp/0.10.35/deps/v8/include \
+	-I/home/tommaso/.node-gyp/0.12.4/src \
+	-I/home/tommaso/.node-gyp/0.12.4/deps/uv/include \
+	-I/home/tommaso/.node-gyp/0.12.4/deps/v8/include \
 	-I$(srcdir)/node_modules/nan
 
 OBJS := \
 	$(obj).target/$(TARGET)/src/init.o \
 	$(obj).target/$(TARGET)/src/GearmanClient.o \
-	$(obj).target/$(TARGET)/src/MultipleTask.o
+	$(obj).target/$(TARGET)/src/MultipleTask.o \
+	$(obj).target/$(TARGET)/src/functions.o
 
 # Add to the list of files we specially track dependencies for.
 all_deps += $(OBJS)
