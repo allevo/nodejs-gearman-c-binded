@@ -4,7 +4,11 @@ node_js:
   - "0.12"
 
 before_install:
-  - "sudo apt-get install gearman libgearman-dev"
+  - curl -L "https://launchpad.net/gearmand/1.2/1.1.12/+download/gearmand-1.1.12.tar.gz" | tar zxv
+  - cd gearmand-1.1.12 && ./configure && make && sudo make install && cd .. && rm -rf gearmand-1.1.12
+
+before_script:
+  - /usr/local/sbin/gearmand --daemon --port 4730
 
 notifications:
   email:
