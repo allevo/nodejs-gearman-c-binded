@@ -8,7 +8,8 @@ before_install:
   - sudo apt-get install python-software-properties
   - sudo add-apt-repository -y ppa:gearman-developers/ppa
   - sudo apt-get update
-  - sudo apt-get install gearman-job-server libgearman-dev php5 php5-json php5-gearman
+  - sudo apt-get install gearman-job-server libgearman-dev php5 php5-json php-pear php5-dev
+  - sudo pecl install gearman
   - gearmand --help
   - gearmand --version
 

@@ -6,8 +6,7 @@ var helper = require('./helper');
 var cBinded = require('../index');
 var GearmanClient = cBinded.GearmanClient;
 
-var gearmanProcess;
-describe('client', function (done) {
+describe('client', function () {
   beforeEach(helper.startGearmanServer);
   afterEach(helper.stopGearmanServer);
 

@@ -1,11 +1,11 @@
 'use strict';
 
-var child_process = require('child_process');
+var childProcess = require('child_process');
 
 
 var gearmanProcess;
 function startGearmanServer(done) {
-  gearmanProcess = child_process.spawn('gearmand', ['--port', '4731', '--verbose', 'DEBUG', '--log-file', 'stderr']);
+  gearmanProcess = childProcess.spawn('gearmand', ['--port', '4731', '--verbose', 'DEBUG', '--log-file', 'stderr']);
   var alreadyCalled = false;
   function cb(context, data) {
     if ('stderr' === context) {
@@ -37,7 +37,7 @@ function stopGearmanServer(done) {
 }
 
 function readAllJobs(queue, callback) {
-  var readProcess = child_process.spawn('php', [__dirname + '/../read.php', queue]);
+  var readProcess = childProcess.spawn('php', [__dirname + '/../read.php', queue]);
   var d = '';
   readProcess.stdout.on('data', function(data) {
     d += data.toString();
