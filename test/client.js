@@ -10,6 +10,7 @@ var gearmanProcess;
 describe('client', function (done) {
   beforeEach(helper.startGearmanServer);
   afterEach(helper.stopGearmanServer);
+
   describe('doBackground', function() {
     it('should store the data on gearman', function (done) {
       var client = new GearmanClient();
