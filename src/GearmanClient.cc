@@ -92,17 +92,25 @@ NAN_METHOD(GearmanClient::doJobBackground) {
 	if (args.Length() <= 0 || !args[0]->IsString()) {
 		return NanThrowTypeError("Argument 0 must be a string");
 	}
-	String::Utf8Value queue(args[0]->ToString());
+	String::Utf8Value _q(args[0]->ToString());
+	char* queue = *_q;
 
 	if (args.Length() <= 1 || !args[1]->IsString()) {
 		return NanThrowTypeError("Argument 1 must be a string");
 	}
-	String::Utf8Value data(args[1]->ToString());
+	String::Utf8Value _d(args[1]->ToString());
+	char* data = *_d;
 
-	if (args.Length() <= 2 || !args[2]->IsString()) {
-		return NanThrowTypeError("Argument 2 must be a string");
+	if (args.Length() <= 2 || !(!args[2]->IsString() || !args[2]->IsNull())) {
+		return NanThrowTypeError("Argument 2 must be a string or null");
 	}
-	String::Utf8Value unique(args[2]->ToString());
+	// ugly...
+	char* unique = NULL;
+	if (args[2]->IsString()) {
+		String::Utf8Value _u(args[2]->ToString());
+		unique = new char[_u.length()];
+		strcpy(unique, *_u);
+	}
 
 	if (args.Length() <= 3 || !args[3]->IsFunction()) {
 		return NanThrowTypeError("Argument 3 must be a function");
@@ -111,7 +119,13 @@ NAN_METHOD(GearmanClient::doJobBackground) {
 
 	GearmanClient* gClient = ObjectWrap::Unwrap<GearmanClient>(args.This());
 
-	NanAsyncQueueWorker(new ExecuteTask(gClient, callback, *queue, *data, *unique));
+	gClient->debug && printf("%s|%s|%s|%s\n", "----------------", queue, data, unique);
+	NanAsyncQueueWorker(new ExecuteTask(gClient, callback, queue, data, unique));
+
+	// copied inside ExecuteTask
+	if (unique != NULL) {
+		delete unique;
+	}
 
 	NanReturnUndefined();
 }

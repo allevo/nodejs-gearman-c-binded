@@ -24,8 +24,12 @@ public:
 			data = new char[strlen(_data)];
 			strcpy(data, _data);
 
-			unique = new char[strlen(_unique)];
-			strcpy(unique, _unique);
+			if (_unique == NULL) {
+				unique = NULL;
+			} else {
+				unique = new char[strlen(_unique)];
+				strcpy(unique, _unique);
+			}
 		}
 	~ExecuteTask() {
 		gClient->debug && printf("%s\n", "~ExecuteTask");
@@ -42,9 +46,14 @@ public:
 	void HandleOKCallback () {
 		NanScope();
 
-		Local<Value> argv[] = { NanNew<Number>(ret) , NanNew<String>(handle) };
+		if (handle && strlen(handle) > 0) {
+			Local<Value> argv[2] = { NanNew<Number>(ret) , NanNew<String>(handle) };
+			callback->Call(2, argv);
+		} else {
 
-		callback->Call(2, argv);
+			Local<Value> argv[1] = { NanNew<Number>(ret) };
+			callback->Call(1, argv);
+		}
 	}
 
 private:

@@ -28,6 +28,7 @@ function stopGearmanServer(done) {
     return done();
   }
   gearmanProcess.on('exit', function() {
+    gearmanProcess = null;
     done();
   });
   gearmanProcess.kill('SIGKILL');
