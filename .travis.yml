@@ -10,6 +10,7 @@ before_install:
   - sudo pecl install gearman
   - gearmand --help
   - gearmand --version
+  - echo "extension=gearman.so" >> `php --ini | grep 'Scan for additional' | awk '{ print $7 }'`/20-gearman.ini
 
 notifications:
   email:
