@@ -1,5 +1,9 @@
 <?php
 
+if (!class_exists('GearmanWorker')) {
+	echo 'GearmanWorker class unknown';
+	exit(1);
+}
 
 $worker = new GearmanWorker();
 $worker->addServer('127.0.0.1', 4731);

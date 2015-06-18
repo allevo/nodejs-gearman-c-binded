@@ -40,21 +40,22 @@ function readAllJobs(queue, callback) {
   var readProcess = childProcess.spawn('php', [__dirname + '/../read.php', queue]);
   var d = '';
   readProcess.stdout.on('data', function(data) {
+    console.log('on data', data.toString());
     d += data.toString();
   });
   readProcess.on('exit', function() {
+    console.log('on exit', arguments);
     try {
       var splitted = d.split('\n');
-      var parsec = [];
+      var parsed = [];
       for(var i in splitted) {
         console.log(splitted[i]);
-        parsec.push(JSON.parse(splitted[i]));
+        parsed.push(JSON.parse(splitted[i]));
       }
-      var parsed = d.split('\n').map(JSON.parse.bind(JSON));
       callback(null, parsed);
     } catch (e) {
       console.log(d);
-      callback(e)
+      callback('error here', e)
     }
   });
 }
