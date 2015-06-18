@@ -15,9 +15,10 @@
   },
   "scripts": {
     "build": "node-gyp configure build",
+    "build-read": "gcc read.c -o read -lgearman -L/usr/lib/",
     "mocha": "./node_modules/mocha/bin/mocha test",
     "lint": "./node_modules/.bin/jshint .",
-    "test": "npm run-script build && npm run-script mocha && npm run-script lint"
+    "test": "npm run-script build && npm run-script build-read && npm run-script mocha && npm run-script lint"
   },
   "repository": {
     "type": "git",

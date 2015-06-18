@@ -32,6 +32,7 @@ public:
 	static v8::Local<v8::Object> NewInstance();
 
 	static NAN_METHOD(addJobBackground);
+	static NAN_METHOD(execute);
 
 private:
 	vector<MultipleTaskElement*> elements;

@@ -28,7 +28,7 @@ void GearmanClient::Init(Handle<Object> exports) {
 	NanScope();
 	Local<FunctionTemplate> t = NanNew<FunctionTemplate>(New);
 	t->InstanceTemplate()->SetInternalFieldCount(1);
-	t->SetClassName(NanNew("GearmanClient"));
+	t->SetClassName(NanNew<String>("GearmanClient"));
 
 	NODE_SET_PROTOTYPE_METHOD(t, "doJobBackground", doJobBackground);
 	NODE_SET_PROTOTYPE_METHOD(t, "setDebug", setDebug);
@@ -70,9 +70,9 @@ NAN_METHOD(GearmanClient::addServer) {
 	GearmanClient* gClient = ObjectWrap::Unwrap<GearmanClient>(args.This());
 
 	gClient->debug && printf("%s %s %d\n", "addServer", *str, port);
-	gearman_client_add_server(gClient->client, host, (in_port_t) port);
+	gearman_return_t ret = gearman_client_add_server(gClient->client, host, (in_port_t) port);
 
-	NanReturnValue(NanNew<Boolean>(true));
+	NanReturnValue(NanNew<Boolean>(gearman_success(ret)));
 }
 
 NAN_METHOD(GearmanClient::setDebug) {
@@ -112,6 +112,7 @@ NAN_METHOD(GearmanClient::doJobBackground) {
 	GearmanClient* gClient = ObjectWrap::Unwrap<GearmanClient>(args.This());
 
 	NanAsyncQueueWorker(new ExecuteTask(gClient, callback, *queue, *data, *unique));
+
 	NanReturnUndefined();
 }
 

@@ -37,8 +37,9 @@ function stopGearmanServer(done) {
 }
 
 function readAllJobs(queue, callback) {
-  var readProcess = childProcess.spawn('php', [__dirname + '/../read.php', queue]);
+  var readProcess = childProcess.spawn(__dirname + '/../read', [queue]);
   var d = '';
+  // console.log('Spawing for queue:', queue, __dirname + '/../read');
   readProcess.stdout.on('data', function(data) {
     console.log('on data', data.toString());
     d += data.toString();
@@ -50,15 +51,19 @@ function readAllJobs(queue, callback) {
       var parsed = [];
       for(var i in splitted) {
         console.log(splitted[i]);
-        parsed.push(JSON.parse(splitted[i]));
+        parsed.push(splitted[i].split('| '));
       }
-      callback(null, parsed);
     } catch (e) {
       console.log(d);
-      callback('error here', e)
+      return callback('error here' + e)
     }
+    callback(null, parsed);
   });
 }
+
+process.on('exit', function() {
+  stopGearmanServer(function() {});
+});
 
 module.exports = {
   startGearmanServer: startGearmanServer,
