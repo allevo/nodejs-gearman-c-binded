@@ -16,36 +16,36 @@ describe('module', function () {
     });
   });
 
-  describe('gearman_success', function () {
+  describe('gearmanSuccess', function () {
     it('should be a function', function () {
-      assert.equal(Function, cBinded.gearman_success.constructor);
+      assert.equal(Function, cBinded.gearmanSuccess.constructor);
     });
 
     it('should return correct value', function () {
-      assert.equal(true, cBinded.gearman_success(cBinded.GEARMAN_SUCCESS));
-      assert.equal(false, cBinded.gearman_success(cBinded.GEARMAN_TIMEOUT));
+      assert.equal(true, cBinded.gearmanSuccess(cBinded.GEARMAN_SUCCESS));
+      assert.equal(false, cBinded.gearmanSuccess(cBinded.GEARMAN_TIMEOUT));
     });
   });
 
-  describe('gearman_failed', function () {
+  describe('gearmanFailed', function () {
     it('should be a function', function () {
-      assert.equal(Function, cBinded.gearman_failed.constructor);
+      assert.equal(Function, cBinded.gearmanFailed.constructor);
     });
 
     it('should return correct value', function () {
-      assert.equal(false, cBinded.gearman_failed(cBinded.GEARMAN_SUCCESS));
-      assert.equal(true, cBinded.gearman_failed(cBinded.GEARMAN_TIMEOUT));
+      assert.equal(false, cBinded.gearmanFailed(cBinded.GEARMAN_SUCCESS));
+      assert.equal(true, cBinded.gearmanFailed(cBinded.GEARMAN_TIMEOUT));
     });
   });
 
-  describe('gearman_continue', function () {
+  describe('gearmanContinue', function () {
     it('should be a function', function () {
-      assert.equal(Function, cBinded.gearman_continue.constructor);
+      assert.equal(Function, cBinded.gearmanContinue.constructor);
     });
 
     it('should return correct value', function () {
-      assert.equal(false, cBinded.gearman_continue(cBinded.GEARMAN_SUCCESS));
-      assert.equal(false, cBinded.gearman_continue(cBinded.GEARMAN_TIMEOUT));
+      assert.equal(false, cBinded.gearmanContinue(cBinded.GEARMAN_SUCCESS));
+      assert.equal(false, cBinded.gearmanContinue(cBinded.GEARMAN_TIMEOUT));
     });
   });
 

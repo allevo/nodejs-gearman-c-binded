@@ -10,8 +10,8 @@ using namespace node;
 #include <libgearman/gearman.h>
 
 NAN_METHOD(strerror);
-NAN_METHOD(gearman_success);
-NAN_METHOD(gearman_failed);
-NAN_METHOD(gearman_continue);
+NAN_METHOD(gearmanSuccess);
+NAN_METHOD(gearmanFailed);
+NAN_METHOD(gearmanContinue);
 
 #endif

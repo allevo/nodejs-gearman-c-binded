@@ -10,7 +10,7 @@ NAN_METHOD(strerror) {
 	NanReturnValue(NanNew<String>(gearman_strerror((gearman_return_t) args[0]->Int32Value())));
 }
 
-NAN_METHOD(gearman_success) {
+NAN_METHOD(gearmanSuccess) {
 	NanScope();
 	if (args.Length() < 1 || !args[0]->IsInt32()) {
 		return NanThrowTypeError("Wrong arguments");
@@ -18,7 +18,7 @@ NAN_METHOD(gearman_success) {
 	NanReturnValue(NanNew<Boolean>(gearman_success((gearman_return_t) args[0]->Int32Value())));
 }
 
-NAN_METHOD(gearman_failed) {
+NAN_METHOD(gearmanFailed) {
 	NanScope();
 	if (args.Length() < 1 || !args[0]->IsInt32()) {
 		return NanThrowTypeError("Wrong arguments");
@@ -26,7 +26,7 @@ NAN_METHOD(gearman_failed) {
 	NanReturnValue(NanNew<Boolean>(gearman_failed((gearman_return_t) args[0]->Int32Value())));
 }
 
-NAN_METHOD(gearman_continue) {
+NAN_METHOD(gearmanContinue) {
 	NanScope();
 	if (args.Length() < 1 || !args[0]->IsInt32()) {
 		return NanThrowTypeError("Wrong arguments");

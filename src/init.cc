@@ -89,9 +89,9 @@ void defineConstants(Handle<Object> exports) {
 
 void defineFunctions(Handle<Object> exports) {
 	exports->Set(NanNew("strerror"), NanNew<FunctionTemplate>(strerror)->GetFunction());
-	exports->Set(NanNew("gearman_success"), NanNew<FunctionTemplate>(gearman_success)->GetFunction());
-	exports->Set(NanNew("gearman_failed"), NanNew<FunctionTemplate>(gearman_failed)->GetFunction());
-	exports->Set(NanNew("gearman_continue"), NanNew<FunctionTemplate>(gearman_continue)->GetFunction());
+	exports->Set(NanNew("gearmanSuccess"), NanNew<FunctionTemplate>(gearmanSuccess)->GetFunction());
+	exports->Set(NanNew("gearmanFailed"), NanNew<FunctionTemplate>(gearmanFailed)->GetFunction());
+	exports->Set(NanNew("gearmanContinue"), NanNew<FunctionTemplate>(gearmanContinue)->GetFunction());
 }
 
 

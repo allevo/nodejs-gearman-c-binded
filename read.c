@@ -8,7 +8,7 @@ void* myfunc(gearman_job_st *job, void *data, size_t *size, gearman_return_t *re
     *ret=GEARMAN_SUCCESS;
     char *result=(char*)calloc(30,sizeof(char));
     strcpy(result,"work completed");
-    printf("%s|%s|%s\n", (char*) gearman_job_workload(job), gearman_job_unique(job), gearman_job_handle(job));
+    printf("%s|%s|%s|%s\n", (char*) gearman_job_workload(job), gearman_job_unique(job), gearman_job_handle(job), gearman_job_function_name(job));
     *size=30;
     return result;
 }

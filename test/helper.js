@@ -8,9 +8,6 @@ function startGearmanServer(done) {
   gearmanProcess = childProcess.spawn('gearmand', ['--port', '4731', '--verbose', 'DEBUG', '--log-file', 'stderr']);
   var alreadyCalled = false;
   function cb(context, data) {
-    if ('stderr' === context) {
-      // console.log(data.toString());
-    }
     if (!alreadyCalled) {
       if (context === 'stderr' && data.toString().match(/replaying queue: end/)) {
         alreadyCalled = true;
@@ -39,23 +36,26 @@ function stopGearmanServer(done) {
 function readAllJobs(queue, callback) {
   var readProcess = childProcess.spawn(__dirname + '/../read', [queue]);
   var d = '';
-  // console.log('Spawing for queue:', queue, __dirname + '/../read');
   readProcess.stdout.on('data', function(data) {
-    console.log('on data', data.toString());
     d += data.toString();
   });
   readProcess.on('exit', function() {
-    console.log('on exit', arguments);
+    var parsed = [];
     try {
       var splitted = d.split('\n');
-      var parsed = [];
+      splitted.pop();
       for(var i in splitted) {
-        console.log(splitted[i]);
-        parsed.push(splitted[i].split('| '));
+        var parts = splitted[i].split('|');
+        parsed.push({
+          workload: parts[0],
+          unique: parts[1],
+          handle: parts[2],
+          func: parts[3],
+        });
       }
     } catch (e) {
       console.log(d);
-      return callback('error here' + e)
+      return callback(e);
     }
     callback(null, parsed);
   });
