@@ -48,7 +48,7 @@ function readAllJobs(queue, callback) {
       var parsec = [];
       for(var i in splitted) {
         console.log(splitted[i]);
-        parsec.push(JSON.parse(splitted[i]);
+        parsec.push(JSON.parse(splitted[i]));
       }
       var parsed = d.split('\n').map(JSON.parse.bind(JSON));
       callback(null, parsed);
