@@ -1,5 +1,5 @@
-#ifndef __GEARMANFUNCTIONS_H__
-#define __GEARMANFUNCTIONS_H__
+#ifndef __GEARMAN_FUNCTIONS_H__
+#define __GEARMAN_FUNCTIONS_H__
 
 
 #include <node.h>

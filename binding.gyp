@@ -4,8 +4,8 @@
       "target_name": "gearmannodeCBinded",
       "sources": [
       	"src/init.cc",
-      	"src/GearmanClient.cc",
-      	"src/MultipleTask.cc",
+        "src/WrapGearmanClient.cc",
+        "src/GearmanTask.cc",
       	"src/functions.cc"
       ],
       "link_settings": {

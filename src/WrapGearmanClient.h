@@ -1,5 +1,5 @@
-#ifndef __GEARMANCLIENT_H__
-#define __GEARMANCLIENT_H__
+#ifndef __GEARMAN_WRAP_CLIENT_H__
+#define __GEARMAN_WRAP_CLIENT_H__
 
 
 #include <node.h>
@@ -9,10 +9,7 @@ using namespace node;
 
 #include <libgearman/gearman.h>
 
-#include <set>
-using namespace std;
-
-class GearmanClient : public ObjectWrap {
+class WrapGearmanClient : public ObjectWrap {
 public:
 	static Persistent<Function> constructor;
 	static void Init(Handle<Object> exports);
@@ -20,14 +17,13 @@ public:
 
 	static NAN_METHOD(addServer);
 
-	static NAN_METHOD(doJobBackground);
 	static NAN_METHOD(setDebug);
-	static NAN_METHOD(getMultipleTask);
+	static NAN_METHOD(_execute);
 
-	explicit GearmanClient();
-	~GearmanClient() {}
+	explicit WrapGearmanClient();
+	~WrapGearmanClient() {}
 
-	gearman_client_st * client;
+	gearman_client_st* client;
 
 	bool debug;
 };

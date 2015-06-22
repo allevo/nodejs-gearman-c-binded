@@ -4,8 +4,8 @@
 #endif
 
 
-#include "GearmanClient.h"
-#include "MultipleTask.h"
+#include "WrapGearmanClient.h"
+#include "GearmanTask.h"
 #include "functions.h"
 
 #define DEFINE_CONSTANT(t, c)									\
@@ -96,8 +96,8 @@ void defineFunctions(Handle<Object> exports) {
 
 
 void InitAll(Handle<Object> exports, Handle<Object> module) {
-	GearmanClient::Init(exports);
-	MultipleTask::Init(exports);
+	WrapGearmanClient::Init(exports);
+	GearmanTask::Init(exports);
 	defineConstants(exports);
 	defineFunctions(exports);
 }
