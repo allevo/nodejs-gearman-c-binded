@@ -21,7 +21,8 @@ describe('client', function () {
       client.stop(done);
     });
     it('should store the data on gearman', function (done) {
-      var job = client.doBackground('queue', 'data', 'unique', function() {
+      var job = client.doBackground('queue', 'data', 'unique', function(err) {
+        assert.ifError(err);
 
         assert.equal(job.returnCode(), cBinded.GEARMAN_SUCCESS);
         assert.equal(job.unique(), 'unique');
@@ -42,7 +43,9 @@ describe('client', function () {
     });
 
     it('should store the data on gearman with different data', function (done) {
-      var job = client.doBackground('foo', 'blablabla', 'unique2', function() {
+      var job = client.doBackground('foo', 'blablabla', 'unique2', function(err) {
+        assert.ifError(err);
+
         assert.equal(job.returnCode(), cBinded.GEARMAN_SUCCESS);
         assert.equal(job.unique(), 'unique2');
 
@@ -61,7 +64,9 @@ describe('client', function () {
     });
 
     it('should store the data on gearman without unique', function (done) {
-      var job = client.doBackground('queue', 'blablabla', null, function() {
+      var job = client.doBackground('queue', 'blablabla', null, function(err) {
+        assert.ifError(err);
+
         assert.equal(cBinded.GEARMAN_SUCCESS, job.returnCode());
         assert.equal(String, job.handle().constructor);
 
@@ -83,9 +88,12 @@ describe('client', function () {
 
     it('should return error if gearman is unreachable', function (done) {
       helper.stopGearmanServer(function() {
-        var job = client.doBackground('queue', 'data', 'unique', function() {
+        var job = client.doBackground('queue', 'data', 'unique', function(err) {
           assert.equal(cBinded.GEARMAN_COULD_NOT_CONNECT, job.returnCode());
           assert.equal('', job.handle());
+
+          assert.equal(err.message, 'Gearman error');
+          assert.equal(err.code, cBinded.GEARMAN_COULD_NOT_CONNECT);
 
           done();
         });
@@ -93,15 +101,20 @@ describe('client', function () {
     });
 
     it('should return error if gearman is unreachable on second', function (done) {
-      var job1 = client.doBackground('queue', 'data', 'unique1', function() {
+      var job1 = client.doBackground('queue', 'data', 'unique1', function(err) {
+        assert.ifError(err);
         assert.equal(cBinded.GEARMAN_SUCCESS, job1.returnCode());
 
         helper.stopGearmanServer(function() {
-          var job2 = client.doBackground('queue', 'data', 'unique2', function() {
+
+          var job2 = client.doBackground('queue', 'data', 'unique2', function(err) {
 
             assert.equal(cBinded.GEARMAN_LOST_CONNECTION, job2.returnCode());
             assert.equal('', job2.handle());
             assert.equal(cBinded.GEARMAN_SUCCESS, job1.returnCode());
+
+            assert.equal(err.message, 'Gearman error');
+            assert.equal(err.code, cBinded.GEARMAN_LOST_CONNECTION);
 
             done();
           });

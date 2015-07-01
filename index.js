@@ -11,7 +11,16 @@ function GearmanClient() {
 
 GearmanClient.prototype.doBackground = function(queue, data, unique, callback) {
   var task = new fromNative.GearmanTask(queue, data, unique);
-  this.wrapGearmanClient.doBackground(task, callback);
+  this.wrapGearmanClient.doBackground(task, function() {
+    var err;
+    if (task.returnCode() !== fromNative.GEARMAN_SUCCESS) {
+      err = new Error('Gearman error');
+      err.code = task.returnCode();
+      /*jshint camelcase: false */
+      err.code_description = fromNative.strerror(task.returnCode());
+    }
+    callback(err);
+  });
   return task;
 };
 
