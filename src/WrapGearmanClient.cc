@@ -10,19 +10,71 @@
 #include <cstdio>
 using namespace std;
 
-
-
 Persistent<Function> WrapGearmanClient::constructor;
 
 
-uv_mutex_t client_mutex;
+class MyExecute : public NanAsyncProgressWorker {
+public:
+	WrapGearmanClient* gClient;
 
+	explicit MyExecute(WrapGearmanClient *gClient_)
+		: NanAsyncProgressWorker(new NanCallback()), gClient(gClient_)  { }
+
+	void Execute (const ExecutionProgress& progress) {
+		while(gClient->running) {
+
+			gClient->debug && printf("%s\n", "sleeping...");
+			usleep(1000 * 50);
+			gClient->debug && printf("%s\n", "unslept");
+			gClient->debug && printf("%s %d\n", "size:", (int) gClient->tasks.size());
+
+			char* handle = new char[GEARMAN_JOB_HANDLE_SIZE];
+			for(list<GearmanTask*>::iterator it = gClient->tasks.begin(); it != gClient->tasks.end(); it ++) {
+				GearmanTask* el = *it;
+				el->ret = gearman_client_do_background(gClient->client, el->queue, el->unique, el->data, strlen(el->data), handle);
+
+				gClient->debug && printf("%s %s %s %s %s\n", "qui", gearman_strerror(el->ret), el->unique, el->data, handle);
+
+				strcpy(el->handle, handle);
+			}
+
+			gClient->debug && printf("%s\n", "seding...");
+			progress.Send(NULL, 0);
+			gClient->debug && printf("%s\n", "sent");
+		}
+	}
+
+	void HandleOKCallback () {
+		NanScope();
+		Local<Value> argv[0] = { };
+		gClient->endCallback->Call(0, argv);
+	}
+
+	void HandleProgressCallback(const char *data, size_t size) {
+		gClient->debug && printf("%s %s\n", "DI QUA", data);
+		gClient->debug && printf("%d\n", (int) gClient->tasks.size());
+		int n = gClient->tasks.size();
+		list<GearmanTask*>::iterator it = gClient->tasks.begin();
+
+		for (int i = 0; i < n ; i ++ ) {
+			GearmanTask* el = *it;
+			gClient->debug && printf("%s %s %s %s\n", "QUI", el->handle, el->unique, gearman_strerror(el->ret));
+			Local<Value> argv[0] = { };
+			el->callback->Call(0, argv);
+			gClient->debug && printf("%s\n", "QQQQQQQQQQQQQQ");
+			it++;
+		}
+		gClient->tasks.clear();
+	}
+};
 
 WrapGearmanClient::WrapGearmanClient() {
 	client = gearman_client_create(NULL);
-	printf("gearman_client_create %p\n", client);
 	uv_mutex_init(&client_mutex);
 	debug = false;
+	running = true;
+
+	NanAsyncQueueWorker(new MyExecute(this));
 }
 
 void WrapGearmanClient::Init(Handle<Object> exports) {
@@ -33,7 +85,8 @@ void WrapGearmanClient::Init(Handle<Object> exports) {
 
 	NODE_SET_PROTOTYPE_METHOD(t, "setDebug", setDebug);
 	NODE_SET_PROTOTYPE_METHOD(t, "addServer", addServer);
-	NODE_SET_PROTOTYPE_METHOD(t, "_execute", _execute);
+	NODE_SET_PROTOTYPE_METHOD(t, "doBackground", doBackground);
+	NODE_SET_PROTOTYPE_METHOD(t, "stop", stop);
 
 	NanAssignPersistent(constructor, t->GetFunction());
 	exports->Set(NanNew("WrapGearmanClient"), t->GetFunction());
@@ -48,6 +101,27 @@ NAN_METHOD(WrapGearmanClient::New) {
 
 	WrapGearmanClient* gClient = new WrapGearmanClient();
 	gClient->Wrap(args.This());
+
+	NanReturnValue(args.This());
+}
+
+NAN_METHOD(WrapGearmanClient::doBackground) {
+	NanScope();
+	NanCallback *callback = new NanCallback(args[1].As<Function>());
+	GearmanTask* task = ObjectWrap::Unwrap<GearmanTask>(args[0]->ToObject());
+	WrapGearmanClient* gClient = ObjectWrap::Unwrap<WrapGearmanClient>(args.This());
+
+	task->callback = callback;
+	gClient->tasks.push_back(task);
+
+	NanReturnValue(args.This());
+}
+
+NAN_METHOD(WrapGearmanClient::stop) {
+	NanScope();
+	WrapGearmanClient* gClient = ObjectWrap::Unwrap<WrapGearmanClient>(args.This());
+	gClient->endCallback = new NanCallback(args[0].As<Function>());
+	gClient->running = false;
 
 	NanReturnValue(args.This());
 }
@@ -80,38 +154,16 @@ NAN_METHOD(WrapGearmanClient::setDebug) {
 
 	WrapGearmanClient* gClient = ObjectWrap::Unwrap<WrapGearmanClient>(args.This());
 	if (args.Length() == 1) {
-		gClient->debug = args[1]->BooleanValue();
+		gClient->debug = args[0]->BooleanValue();
 	}
 
 	NanReturnValue(NanNew<Boolean>(true));
 }
 
-
-NAN_METHOD(WrapGearmanClient::_execute) {
-	NanScope();
-
-	if (args.Length() <= 0 || !args[0]->IsArray()) {
-		return NanThrowTypeError("Argument 0 must be an array");
-	}
-
-	if (args.Length() <= 1 || !args[1]->IsFunction()) {
-		return NanThrowTypeError("Argument 1 must be a function");
-	}
-	NanCallback *callback = new NanCallback(args[1].As<Function>());
-	list<GearmanTask*>* tasks = new list<GearmanTask*>;
-	Local<Array> array = Local<Array>::Cast(args[0]);
-	int length = array->Length();
-	for (int i = 0, pos = 1; i < length; i++, pos++) {
-		Local<Value> taskObject = array->Get(i);
-		GearmanTask* task = ObjectWrap::Unwrap<GearmanTask>(taskObject->ToObject());
-printf("%s %p\n", "AAAAAAAAAA", task);
-		tasks->push_back(task);
-	}
-
-	WrapGearmanClient* gClient = ObjectWrap::Unwrap<WrapGearmanClient>(args.This());
-	printf("%s %p\n", "BEFORE", gClient->client);
-	NanAsyncQueueWorker(new ExecuteTask(gClient, tasks, callback));
-
-	NanReturnValue(NanNew<Boolean>(true));
+void WrapGearmanClient::lockClient() {
+	uv_mutex_lock(&client_mutex);
 }
 
+void WrapGearmanClient::unlockClient() {
+	uv_mutex_unlock(&client_mutex);
+}

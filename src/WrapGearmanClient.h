@@ -9,6 +9,11 @@ using namespace node;
 
 #include <libgearman/gearman.h>
 
+
+#include <list>
+using namespace std;
+#include "GearmanTask.h"
+
 class WrapGearmanClient : public ObjectWrap {
 public:
 	static Persistent<Function> constructor;
@@ -18,14 +23,29 @@ public:
 	static NAN_METHOD(addServer);
 
 	static NAN_METHOD(setDebug);
-	static NAN_METHOD(_execute);
+	static NAN_METHOD(doBackground);
+	static NAN_METHOD(stop);
 
 	explicit WrapGearmanClient();
-	~WrapGearmanClient() {}
+	~WrapGearmanClient() {
+		gearman_client_task_free_all(client);
+		gearman_client_free(client);
+	}
+
+	void lockClient();
+	void unlockClient();
 
 	gearman_client_st* client;
 
 	bool debug;
+	bool running;
+
+	uv_mutex_t client_mutex;
+
+	list<GearmanTask*> tasks;
+
+	NanCallback* endCallback;
+private:
 };
 
 #endif

@@ -31,14 +31,12 @@ public:
 	}
 
 	void Execute () {
-		printf("%s %p %p\n", "DDDDD", gClient->client);
+		gClient->lockClient();
 		for(std::list<GearmanTask*>::iterator it = tasks->begin(); it != tasks->end(); it++) {
 			GearmanTask* el = *it;
-		printf("%s %p\n", "eeeee", el);
 			el->ret = gearman_client_do_background(gClient->client, el->queue, el->unique, el->data, strlen(el->data), el->handle);
-		printf("%s\n", "FFFFF");
-			printf("%s %s %s %s %d %s %s\n", "EXECUTE!!", el->queue, el->data, el->unique, el->ret, gearman_strerror(el->ret), el->handle);
 		}
+		gClient->unlockClient();
 	}
 
 	void HandleOKCallback () {
@@ -48,6 +46,7 @@ public:
 				printf("%s\n", "GGGGG");
 		callback->Call(1, argv);
 				printf("%s\n", "HHHHH");
+		delete tasks;
 	}
 };
 

@@ -36,7 +36,7 @@ NAN_METHOD(GearmanTask::getReturnCode) {
 	NanScope();
 	GearmanTask* gTask = ObjectWrap::Unwrap<GearmanTask>(args.This());
 
-	NanReturnValue(NanNew<Number>(gTask->ret));
+	NanReturnValue(NanNew<Number>((int) gTask->ret));
 }
 
 NAN_METHOD(GearmanTask::New) {
@@ -56,13 +56,14 @@ NAN_METHOD(GearmanTask::New) {
 	}
 	String::Utf8Value data(args[1]->ToString());
 
-	if (args.Length() <= 2 || !args[2]->IsString()) {
+	if (args.Length() <= 2 || !(args[2]->IsString() || args[2]->IsNull())) {
 		return NanThrowTypeError("Argument 2 must be a string");
 	}
 	String::Utf8Value unique(args[2]->ToString());
 
-	GearmanTask* gClient = new GearmanTask(*queue, *data, *unique);
-	gClient->Wrap(args.This());
+	GearmanTask* gTask = new GearmanTask(*queue, *data, args[2]->IsNull() ? NULL : *unique);
+	gTask->ret = (gearman_return_t) -1;
+	gTask->Wrap(args.This());
 
 	NanReturnValue(args.This());
 }
@@ -72,8 +73,12 @@ GearmanTask::GearmanTask(char* queue, char* data, char* unique) {
 	strcpy(this->queue, queue);
 	this->data = new char[strlen(data)];
 	strcpy(this->data, data);
-	this->unique = new char[strlen(unique)];
-	strcpy(this->unique, unique);
+
+	this->unique = NULL;
+	if (unique != NULL) {
+		this->unique = new char[strlen(unique)];
+		strcpy(this->unique, unique);
+	}
 }
 
 GearmanTask::~GearmanTask() {

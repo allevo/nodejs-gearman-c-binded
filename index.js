@@ -2,33 +2,29 @@
 
 var fromNative = require('./build/Release/gearmannodeCBinded');
 
+console.log(fromNative.LIBGEARMAN_VERSION_STRING);
+
 function GearmanClient() {
   this.tasks = [];
   this.wrapGearmanClient = new fromNative.WrapGearmanClient();
 }
 
 GearmanClient.prototype.doBackground = function(queue, data, unique, callback) {
-  var task = this.queueTaskBackground(queue, data, unique);
-  this.execute(callback);
-  return task;
-}
-
-GearmanClient.prototype.queueTaskBackground = function(queue, data, unique) {
   var task = new fromNative.GearmanTask(queue, data, unique);
-  this.tasks.push(task);
+  this.wrapGearmanClient.doBackground(task, callback);
   return task;
+};
+
+GearmanClient.prototype.setDebug = function() {
+  this.wrapGearmanClient.setDebug(true);
 };
 
 GearmanClient.prototype.addServer = function(host, port) {
   this.wrapGearmanClient.addServer(host, port);
 };
 
-GearmanClient.prototype.execute = function(callback) {
-  var self = this;
-  console.log(this.task);
-  this.wrapGearmanClient._execute(this.tasks, function() {
-    callback(self.tasks);
-  });
+GearmanClient.prototype.stop = function(callback) {
+  this.wrapGearmanClient.stop(callback);
 };
 
 for(var k in fromNative) {

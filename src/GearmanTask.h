@@ -30,6 +30,10 @@ public:
 	char* unique;
 	gearman_job_handle_t handle;
 	gearman_return_t ret;
+
+	NanCallback *callback;
+
+private:
 };
 
 #endif

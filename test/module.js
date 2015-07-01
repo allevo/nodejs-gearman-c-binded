@@ -61,10 +61,6 @@ describe('module', function () {
     assert.equal(Function, cBinded.GearmanClient.constructor);
   });
 
-  it('should export MultipleTask', function () {
-    assert.equal(Function, cBinded.MultipleTask.constructor);
-  });
-
   it('should export all gearman constant', function () {
     var con = [
       'GEARMAN_SUCCESS',

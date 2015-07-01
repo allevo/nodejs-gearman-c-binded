@@ -40,6 +40,10 @@ function readAllJobs(queue, callback) {
   readProcess.stdout.on('data', function(data) {
     d += data.toString();
   });
+  /* readProcess.stderr.on('data', function(data) {
+    console.log('-------------', data.toString());
+  });
+  */
   readProcess.on('exit', function() {
     var parsed = [];
     try {
