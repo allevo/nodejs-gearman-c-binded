@@ -16,6 +16,7 @@ describe('client', function () {
     beforeEach(function() {
       client = new GearmanClient();
       client.addServer('127.0.0.1', 4731);
+      // client.setDebug(true);
     });
     afterEach(function(done) {
       client.stop(done);

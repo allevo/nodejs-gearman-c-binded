@@ -23,24 +23,27 @@ public:
 	void Execute (const ExecutionProgress& progress) {
 		while(gClient->running) {
 
-			gClient->debug && printf("%s\n", "sleeping...");
-			usleep(1000 * 50);
-			gClient->debug && printf("%s\n", "unslept");
-			gClient->debug && printf("%s %d\n", "size:", (int) gClient->tasks.size());
+			gClient->debug && printf("%s\n", "-- sleeping...");
+			usleep(500);
+			gClient->debug && printf("%s\n", "-- unslept");
+			gClient->debug && printf("%s %d\n", "-- size:", (int) gClient->tasks.size());
 
 			char* handle = new char[GEARMAN_JOB_HANDLE_SIZE];
 			for(list<GearmanTask*>::iterator it = gClient->tasks.begin(); it != gClient->tasks.end(); it ++) {
 				GearmanTask* el = *it;
+				if (el->done) { continue; }
+				el->done = true;
+
 				el->ret = gearman_client_do_background(gClient->client, el->queue, el->unique, el->data, strlen(el->data), handle);
 
-				gClient->debug && printf("%s %s %s %s %s\n", "qui", gearman_strerror(el->ret), el->unique, el->data, handle);
-
+				gClient->debug && printf("%s %s %s %s %s\n", "-- qui", gearman_strerror(el->ret), el->unique, el->data, handle);
 				strcpy(el->handle, handle);
+
 			}
 
-			gClient->debug && printf("%s\n", "seding...");
+			gClient->debug && printf("%s\n", "-- seding...");
 			progress.Send(NULL, 0);
-			gClient->debug && printf("%s\n", "sent");
+			gClient->debug && printf("%s\n", "-- sent");
 		}
 	}
 
@@ -58,13 +61,15 @@ public:
 
 		for (int i = 0; i < n ; i ++ ) {
 			GearmanTask* el = *it;
+			if (!el->done) { continue; }
 			gClient->debug && printf("%s %s %s %s\n", "QUI", el->handle, el->unique, gearman_strerror(el->ret));
 			Local<Value> argv[0] = { };
 			el->callback->Call(0, argv);
 			gClient->debug && printf("%s\n", "QQQQQQQQQQQQQQ");
+			gClient->tasks.remove(el);
+
 			it++;
 		}
-		gClient->tasks.clear();
 	}
 };
 

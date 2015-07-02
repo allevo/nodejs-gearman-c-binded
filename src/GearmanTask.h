@@ -31,6 +31,8 @@ public:
 	gearman_job_handle_t handle;
 	gearman_return_t ret;
 
+	bool done;
+
 	NanCallback *callback;
 
 private:

@@ -62,7 +62,7 @@ NAN_METHOD(GearmanTask::New) {
 	String::Utf8Value unique(args[2]->ToString());
 
 	GearmanTask* gTask = new GearmanTask(*queue, *data, args[2]->IsNull() ? NULL : *unique);
-	gTask->ret = (gearman_return_t) -1;
+	gTask->done = false;
 	gTask->Wrap(args.This());
 
 	NanReturnValue(args.This());
