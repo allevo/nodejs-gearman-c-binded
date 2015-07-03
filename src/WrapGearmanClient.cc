@@ -1,8 +1,8 @@
 
 
 #include "WrapGearmanClient.h"
-#include "ExecuteTask.h"
-#include "GearmanTask.h"
+#include "BackgroundTask.h"
+#include "Baton.h"
 
 #include <string>
 #include <cstring>
@@ -28,17 +28,12 @@ public:
 			gClient->debug && printf("%s\n", "-- unslept");
 			gClient->debug && printf("%s %d\n", "-- size:", (int) gClient->tasks.size());
 
-			char* handle = new char[GEARMAN_JOB_HANDLE_SIZE];
-			for(list<GearmanTask*>::iterator it = gClient->tasks.begin(); it != gClient->tasks.end(); it ++) {
-				GearmanTask* el = *it;
-				if (el->done) { continue; }
-				el->done = true;
+			for(list<Baton*>::iterator it = gClient->tasks.begin(); it != gClient->tasks.end(); it ++) {
+				Baton* el = *it;
+				if (el->isDone()) { continue; }
+				el->setToDone();
 
-				el->ret = gearman_client_do_background(gClient->client, el->queue, el->unique, el->data, strlen(el->data), handle);
-
-				gClient->debug && printf("%s %s %s %s %s\n", "-- qui", gearman_strerror(el->ret), el->unique, el->data, handle);
-				strcpy(el->handle, handle);
-
+				el->Execute(gClient);
 			}
 
 			gClient->debug && printf("%s\n", "-- seding...");
@@ -57,14 +52,12 @@ public:
 		gClient->debug && printf("%s %s\n", "DI QUA", data);
 		gClient->debug && printf("%d\n", (int) gClient->tasks.size());
 		int n = gClient->tasks.size();
-		list<GearmanTask*>::iterator it = gClient->tasks.begin();
+		list<Baton*>::iterator it = gClient->tasks.begin();
 
 		for (int i = 0; i < n ; i ++ ) {
-			GearmanTask* el = *it;
-			if (!el->done) { continue; }
-			gClient->debug && printf("%s %s %s %s\n", "QUI", el->handle, el->unique, gearman_strerror(el->ret));
-			Local<Value> argv[0] = { };
-			el->callback->Call(0, argv);
+			Baton* el = *it;
+			if (!el->isDone()) { continue; }
+			el->invokeCallback();
 			gClient->debug && printf("%s\n", "QQQQQQQQQQQQQQ");
 			gClient->tasks.remove(el);
 
@@ -113,11 +106,11 @@ NAN_METHOD(WrapGearmanClient::New) {
 NAN_METHOD(WrapGearmanClient::doBackground) {
 	NanScope();
 	NanCallback *callback = new NanCallback(args[1].As<Function>());
-	GearmanTask* task = ObjectWrap::Unwrap<GearmanTask>(args[0]->ToObject());
+	BackgroundTask* task = ObjectWrap::Unwrap<BackgroundTask>(args[0]->ToObject());
 	WrapGearmanClient* gClient = ObjectWrap::Unwrap<WrapGearmanClient>(args.This());
 
-	task->callback = callback;
-	gClient->tasks.push_back(task);
+	Baton* baton = new JobBackgroundBaton(task, callback);
+	gClient->tasks.push_back(baton);
 
 	NanReturnValue(args.This());
 }

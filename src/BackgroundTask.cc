@@ -1,49 +1,49 @@
 
-#include "GearmanTask.h"
+#include "BackgroundTask.h"
 
 
-Persistent<Function> GearmanTask::constructor;
+Persistent<Function> BackgroundTask::constructor;
 
-void GearmanTask::Init(Handle<Object> exports) {
+void BackgroundTask::Init(Handle<Object> exports) {
 	NanScope();
 	Local<FunctionTemplate> t = NanNew<FunctionTemplate>(New);
 	t->InstanceTemplate()->SetInternalFieldCount(1);
-	t->SetClassName(NanNew<String>("GearmanTask"));
+	t->SetClassName(NanNew<String>("BackgroundTask"));
 
 	NODE_SET_PROTOTYPE_METHOD(t, "handle", getHandle);
 	NODE_SET_PROTOTYPE_METHOD(t, "unique", getUnique);
 	NODE_SET_PROTOTYPE_METHOD(t, "returnCode", getReturnCode);
 
 	NanAssignPersistent(constructor, t->GetFunction());
-	exports->Set(NanNew("GearmanTask"), t->GetFunction());
+	exports->Set(NanNew("BackgroundTask"), t->GetFunction());
 }
 
-NAN_METHOD(GearmanTask::getHandle) {
+NAN_METHOD(BackgroundTask::getHandle) {
 	NanScope();
-	GearmanTask* gTask = ObjectWrap::Unwrap<GearmanTask>(args.This());
+	BackgroundTask* gTask = ObjectWrap::Unwrap<BackgroundTask>(args.This());
 
 	NanReturnValue(NanNew<String>(gTask->handle));
 }
 
-NAN_METHOD(GearmanTask::getUnique) {
+NAN_METHOD(BackgroundTask::getUnique) {
 	NanScope();
-	GearmanTask* gTask = ObjectWrap::Unwrap<GearmanTask>(args.This());
+	BackgroundTask* gTask = ObjectWrap::Unwrap<BackgroundTask>(args.This());
 
 	NanReturnValue(NanNew<String>(gTask->unique));
 }
 
-NAN_METHOD(GearmanTask::getReturnCode) {
+NAN_METHOD(BackgroundTask::getReturnCode) {
 	NanScope();
-	GearmanTask* gTask = ObjectWrap::Unwrap<GearmanTask>(args.This());
+	BackgroundTask* gTask = ObjectWrap::Unwrap<BackgroundTask>(args.This());
 
 	NanReturnValue(NanNew<Number>((int) gTask->ret));
 }
 
-NAN_METHOD(GearmanTask::New) {
+NAN_METHOD(BackgroundTask::New) {
 	NanScope();
 
 	if (!args.IsConstructCall()) {
-		return NanThrowTypeError("Use the new operator to create new GearmanTask objects");
+		return NanThrowTypeError("Use the new operator to create new BackgroundTask objects");
 	}
 
 	if (args.Length() <= 0 || !args[0]->IsString()) {
@@ -61,14 +61,14 @@ NAN_METHOD(GearmanTask::New) {
 	}
 	String::Utf8Value unique(args[2]->ToString());
 
-	GearmanTask* gTask = new GearmanTask(*queue, *data, args[2]->IsNull() ? NULL : *unique);
+	BackgroundTask* gTask = new BackgroundTask(*queue, *data, args[2]->IsNull() ? NULL : *unique);
 	gTask->done = false;
 	gTask->Wrap(args.This());
 
 	NanReturnValue(args.This());
 }
 
-GearmanTask::GearmanTask(char* queue, char* data, char* unique) {
+BackgroundTask::BackgroundTask(char* queue, char* data, char* unique) {
 	this->queue = new char[strlen(queue)];
 	strcpy(this->queue, queue);
 	this->data = new char[strlen(data)];
@@ -81,8 +81,8 @@ GearmanTask::GearmanTask(char* queue, char* data, char* unique) {
 	}
 }
 
-GearmanTask::~GearmanTask() {
-	printf("%s\n", "~GearmanTask");
+BackgroundTask::~BackgroundTask() {
+	printf("%s\n", "~BackgroundTask");
 	delete this->queue;
 	delete this->data;
 	delete this->unique;

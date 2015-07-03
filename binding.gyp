@@ -5,8 +5,9 @@
       "sources": [
       	"src/init.cc",
         "src/WrapGearmanClient.cc",
-        "src/GearmanTask.cc",
-      	"src/functions.cc"
+        "src/BackgroundTask.cc",
+      	"src/functions.cc",
+      	"src/Baton.cc",
       ],
       "link_settings": {
           "libraries": [

@@ -12,7 +12,8 @@ using namespace node;
 
 #include <list>
 using namespace std;
-#include "GearmanTask.h"
+
+class Baton;
 
 class WrapGearmanClient : public ObjectWrap {
 public:
@@ -42,7 +43,7 @@ public:
 
 	uv_mutex_t client_mutex;
 
-	list<GearmanTask*> tasks;
+	list<Baton*> tasks;
 
 	NanCallback* endCallback;
 private:

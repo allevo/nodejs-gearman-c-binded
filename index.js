@@ -10,7 +10,7 @@ function GearmanClient() {
 }
 
 GearmanClient.prototype.doBackground = function(queue, data, unique, callback) {
-  var task = new fromNative.GearmanTask(queue, data, unique);
+  var task = new fromNative.BackgroundTask(queue, data, unique);
   this.wrapGearmanClient.doBackground(task, function() {
     var err;
     if (task.returnCode() !== fromNative.GEARMAN_SUCCESS) {

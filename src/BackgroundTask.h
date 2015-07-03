@@ -1,5 +1,5 @@
-#ifndef __GEARMAN_TASK_H__
-#define __GEARMAN_TASK_H__
+#ifndef __GEARMAN_BACKGROUND_TASK_H__
+#define __GEARMAN_BACKGROUND_TASK_H__
 
 
 #include <v8.h>
@@ -11,7 +11,7 @@ using namespace v8;
 #include <libgearman/gearman.h>
 
 
-class GearmanTask: public ObjectWrap {
+class BackgroundTask: public ObjectWrap {
 public:
 	static Persistent<Function> constructor;
 
@@ -22,13 +22,13 @@ public:
 	static NAN_METHOD(getUnique);
 	static NAN_METHOD(getReturnCode);
 
-	explicit GearmanTask(char* queue, char* data, char* unique);
-	~GearmanTask();
+	explicit BackgroundTask(char* queue, char* data, char* unique);
+	~BackgroundTask();
 
 	char* queue;
 	char* data;
 	char* unique;
-	gearman_job_handle_t handle;
+	char* handle;
 	gearman_return_t ret;
 
 	bool done;

@@ -5,7 +5,7 @@
 
 
 #include "WrapGearmanClient.h"
-#include "GearmanTask.h"
+#include "BackgroundTask.h"
 #include "functions.h"
 
 #define DEFINE_CONSTANT(t, c)									\
@@ -97,7 +97,7 @@ void defineFunctions(Handle<Object> exports) {
 
 void InitAll(Handle<Object> exports, Handle<Object> module) {
 	WrapGearmanClient::Init(exports);
-	GearmanTask::Init(exports);
+	BackgroundTask::Init(exports);
 	defineConstants(exports);
 	defineFunctions(exports);
 }
