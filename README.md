@@ -55,7 +55,7 @@ The libgearman library has many helper functions:
 ```
 
 ## Why
- - There're not lot of gearman library for not. There're no gearman library for node that uses the native library. Each pure javascript implementation can have some problems or bug. This (I hope) not.
+ - There're no gearman library for node that uses the native library. Each pure javascript implementation can have some problems or bug. This (I hope) not.
  - I would like to understand how to build a nodejs addons.
 
 ## Contributing
