@@ -1,0 +1,18 @@
+language: node_js
+node_js:
+  - "0.10"
+  - "0.11"
+  - "0.12"
+
+before_install:
+  - sudo apt-get install python-software-properties
+  - sudo add-apt-repository -y ppa:gearman-developers/ppa
+  - sudo apt-get update
+  - sudo apt-get install gearman-job-server libgearman-dev
+  - gearmand --help
+  - gearmand --version
+
+notifications:
+  email:
+    recipients:
+      - tomallevi@gmail.com

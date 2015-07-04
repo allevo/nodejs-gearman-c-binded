@@ -1,0 +1,38 @@
+{
+  "name": "nodejs-gearman-c-binded",
+  "version": "1.0.0",
+  "description": "Gearman client c-binded implementation",
+  "main": "index.js",
+  "dependencies": {
+    "async": "^1.2.1",
+    "gearmanode": "^0.2.2",
+    "jshint": "^2.8.0",
+    "nan": "^1.8.4",
+    "node-gyp": "^2.0.1"
+  },
+  "devDependencies": {
+    "mocha": "^2.2.5"
+  },
+  "scripts": {
+    "build": "node-gyp configure build",
+    "build-read": "gcc read.c -o read -lgearman -L/usr/lib/",
+    "mocha": "./node_modules/mocha/bin/mocha test",
+    "lint": "./node_modules/.bin/jshint .",
+    "test": "npm run-script build && npm run-script build-read && npm run-script mocha && npm run-script lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/allevo/nodejs-gearman-c-binded.git"
+  },
+  "keywords": [
+    "nodejs",
+    "gearman",
+    "gearmand"
+  ],
+  "author": "allevo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/allevo/nodejs-gearman-c-binded/issues"
+  },
+  "homepage": "https://github.com/allevo/nodejs-gearman-c-binded#readme"
+}
