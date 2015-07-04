@@ -36,6 +36,19 @@ GearmanClient.prototype.stop = function(callback) {
   this.wrapGearmanClient.stop(callback);
 };
 
+GearmanClient.prototype.getStatus = function(handle, callback) {
+  this.wrapGearmanClient.getStatus(handle, function(result) {
+    var err;
+    if (result.returnCode !== fromNative.GEARMAN_SUCCESS) {
+      err = new Error('Gearman error');
+      err.code = result.returnCode;
+      /*jshint camelcase: false */
+      err.code_description = fromNative.strerror(result.returnCode);
+    }
+    callback(err, result);
+  });
+};
+
 for(var k in fromNative) {
   module.exports[k] = fromNative[k];
 }

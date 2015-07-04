@@ -26,6 +26,7 @@ public:
 	static NAN_METHOD(setDebug);
 	static NAN_METHOD(doBackground);
 	static NAN_METHOD(stop);
+	static NAN_METHOD(getStatus);
 
 	explicit WrapGearmanClient();
 	~WrapGearmanClient() {

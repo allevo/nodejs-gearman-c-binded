@@ -3,8 +3,8 @@
 var assert = require('assert');
 
 var helper = require('./helper');
-var cBinded = require('../index');
-var GearmanClient = cBinded.GearmanClient;
+var fromNative = require('../index');
+var GearmanClient = fromNative.GearmanClient;
 
 
 var client;
@@ -16,7 +16,6 @@ describe('client', function () {
     beforeEach(function() {
       client = new GearmanClient();
       client.addServer('127.0.0.1', 4731);
-      // client.setDebug(true);
     });
     afterEach(function(done) {
       client.stop(done);
@@ -25,7 +24,7 @@ describe('client', function () {
       var job = client.doBackground('queue', 'data', 'unique', function(err) {
         assert.ifError(err);
 
-        assert.equal(job.returnCode(), cBinded.GEARMAN_SUCCESS);
+        assert.equal(job.returnCode(), fromNative.GEARMAN_SUCCESS);
         assert.equal(job.unique(), 'unique');
 
         helper.readAllJobs('queue', function(err, data) {
@@ -47,7 +46,7 @@ describe('client', function () {
       var job = client.doBackground('foo', 'blablabla', 'unique2', function(err) {
         assert.ifError(err);
 
-        assert.equal(job.returnCode(), cBinded.GEARMAN_SUCCESS);
+        assert.equal(job.returnCode(), fromNative.GEARMAN_SUCCESS);
         assert.equal(job.unique(), 'unique2');
 
         helper.readAllJobs('foo', function(err, data) {
@@ -68,7 +67,7 @@ describe('client', function () {
       var job = client.doBackground('queue', 'blablabla', null, function(err) {
         assert.ifError(err);
 
-        assert.equal(cBinded.GEARMAN_SUCCESS, job.returnCode());
+        assert.equal(fromNative.GEARMAN_SUCCESS, job.returnCode());
         assert.equal(String, job.handle().constructor);
 
         helper.readAllJobs('queue', function(err, data) {
@@ -90,11 +89,11 @@ describe('client', function () {
     it('should return error if gearman is unreachable', function (done) {
       helper.stopGearmanServer(function() {
         var job = client.doBackground('queue', 'data', 'unique', function(err) {
-          assert.equal(cBinded.GEARMAN_COULD_NOT_CONNECT, job.returnCode());
+          assert.equal(fromNative.GEARMAN_COULD_NOT_CONNECT, job.returnCode());
           assert.equal('', job.handle());
 
           assert.equal(err.message, 'Gearman error');
-          assert.equal(err.code, cBinded.GEARMAN_COULD_NOT_CONNECT);
+          assert.equal(err.code, fromNative.GEARMAN_COULD_NOT_CONNECT);
 
           done();
         });
@@ -104,21 +103,80 @@ describe('client', function () {
     it('should return error if gearman is unreachable on second', function (done) {
       var job1 = client.doBackground('queue', 'data', 'unique1', function(err) {
         assert.ifError(err);
-        assert.equal(cBinded.GEARMAN_SUCCESS, job1.returnCode());
+        assert.equal(fromNative.GEARMAN_SUCCESS, job1.returnCode());
 
         helper.stopGearmanServer(function() {
 
           var job2 = client.doBackground('queue', 'data', 'unique2', function(err) {
 
-            assert.equal(cBinded.GEARMAN_LOST_CONNECTION, job2.returnCode());
+            assert.equal(fromNative.GEARMAN_LOST_CONNECTION, job2.returnCode());
             assert.equal('', job2.handle());
-            assert.equal(cBinded.GEARMAN_SUCCESS, job1.returnCode());
+            assert.equal(fromNative.GEARMAN_SUCCESS, job1.returnCode());
 
             assert.equal(err.message, 'Gearman error');
-            assert.equal(err.code, cBinded.GEARMAN_LOST_CONNECTION);
+            assert.equal(err.code, fromNative.GEARMAN_LOST_CONNECTION);
 
             done();
           });
+        });
+      });
+    });
+  });
+
+  describe('getStatus', function() {
+    beforeEach(function() {
+      client = new GearmanClient();
+      client.addServer('127.0.0.1', 4731);
+    });
+    afterEach(function(done) {
+      client.stop(done);
+    });
+
+    it('should return the result if the job exists', function (done) {
+      var job = client.doBackground('queue', 'data', 'unique', function(err) {
+        assert.ifError(err);
+
+        client.getStatus(job.handle(), function(err, result) {
+          assert.ifError(err);
+
+          assert.equal(true, result.is_known);
+          assert.equal(false, result.is_running);
+          assert.equal(0, result.numerator);
+          assert.equal(0, result.denominator);
+
+          assert.equal(fromNative.GEARMAN_SUCCESS, result.returnCode);
+          done();
+        });
+      });
+    });
+
+    it('should return the result if the job doesn\'t exist', function (done) {
+      client.getStatus('unkown handle', function(err, result) {
+        assert.ifError(err);
+
+        assert.equal(false, result.is_known);
+        assert.equal(false, result.is_running);
+        assert.equal(0, result.numerator);
+        assert.equal(0, result.denominator);
+
+        assert.equal(fromNative.GEARMAN_SUCCESS, result.returnCode);
+        done();
+      });
+    });
+
+    it('should return an error if gearman is down', function (done) {
+      helper.stopGearmanServer(function() {
+        client.getStatus('unkown handle', function(err, result) {
+          assert.equal(err.message, 'Gearman error');
+          assert.equal(err.code, fromNative.GEARMAN_COULD_NOT_CONNECT);
+
+          assert.equal(false, result.is_known);
+          assert.equal(false, result.is_running);
+          assert.equal(0, result.numerator);
+          assert.equal(0, result.denominator);
+
+          assert.equal(fromNative.GEARMAN_COULD_NOT_CONNECT, result.returnCode);
+          done();
         });
       });
     });

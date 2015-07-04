@@ -85,6 +85,7 @@ void WrapGearmanClient::Init(Handle<Object> exports) {
 	NODE_SET_PROTOTYPE_METHOD(t, "addServer", addServer);
 	NODE_SET_PROTOTYPE_METHOD(t, "doBackground", doBackground);
 	NODE_SET_PROTOTYPE_METHOD(t, "stop", stop);
+	NODE_SET_PROTOTYPE_METHOD(t, "getStatus", getStatus);
 
 	NanAssignPersistent(constructor, t->GetFunction());
 	exports->Set(NanNew("WrapGearmanClient"), t->GetFunction());
@@ -157,6 +158,27 @@ NAN_METHOD(WrapGearmanClient::setDebug) {
 
 	NanReturnValue(NanNew<Boolean>(true));
 }
+
+NAN_METHOD(WrapGearmanClient::getStatus) {
+	NanScope();
+
+	if (args.Length() <= 0 || !args[0]->IsString()) {
+		return NanThrowTypeError("Argument 0 must be a string");
+	}
+	String::Utf8Value str(args[0]->ToString());
+
+	if (args.Length() <= 1 || !args[1]->IsFunction()) {
+		return NanThrowTypeError("Argument 1 must be a function");
+	}
+	NanCallback *callback = new NanCallback(args[1].As<Function>());
+
+	WrapGearmanClient* gClient = ObjectWrap::Unwrap<WrapGearmanClient>(args.This());
+	Baton* baton = new JobStatusBaton(*str, callback);
+	gClient->tasks.push_back(baton);
+
+	NanReturnValue(args.This());
+}
+
 
 void WrapGearmanClient::lockClient() {
 	uv_mutex_lock(&client_mutex);
