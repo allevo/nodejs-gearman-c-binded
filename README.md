@@ -23,6 +23,18 @@ Always add a server through `addServer` method.
 
 `doBackground` method returns a job instance used later to retreive the handle and the return code. The callback is always called when gearman receives the job successfully or not. If some errors are occurred, the callback has one parameter, the error.
 
+
+After submit a job you can give its status back using `getStatus` client method.
+```javascript
+var job = client.doBackground('queue', 'data', 'unique', function(err) {
+  client.getStatus(job.handle(), function(err, result) {
+    console.log(err); // should be undefined
+    console.log(result.is_known, result.is_running, result.numerator, result.denominator);
+  });
+});
+```
+See tests for more explainations.
+
 ## Other functions
 
 The libgearman library has many helper functions:
@@ -52,3 +64,5 @@ If you want contribute, you are welcome.
  - All tests must be pass.
  - Use gearman always during the test to make your test as realistic as possible.
  - You contribution is very important!
+
+All tests are simple without mocking object and using a real gearman server. Each test should be like your code.
