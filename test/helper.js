@@ -66,6 +66,22 @@ function readAllJobs(queue, callback) {
   });
 }
 
+function queueJob(queue, data, unique, callback) {
+  var queueProcess = childProcess.spawn(__dirname + '/../queue', [queue, data, unique]);
+  var d = '';
+  queueProcess.stdout.on('data', function(data) {
+    console.log(d + '');
+    d += data.toString();
+  });
+
+  queueProcess.stderr.on('data', function(data) {
+    console.log('-------------', data.toString());
+  });
+  queueProcess.on('exit', function() {
+    console.log('EXIT!!');
+  });
+}
+
 process.on('exit', function() {
   stopGearmanServer(function() {});
 });
@@ -74,4 +90,5 @@ module.exports = {
   startGearmanServer: startGearmanServer,
   stopGearmanServer: stopGearmanServer,
   readAllJobs: readAllJobs,
+  queueJob: queueJob,
 };

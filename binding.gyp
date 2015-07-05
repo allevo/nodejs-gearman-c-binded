@@ -8,6 +8,7 @@
         "src/BackgroundTask.cc",
       	"src/functions.cc",
       	"src/Baton.cc",
+        "src/WrapGearmanWorker.cc"
       ],
       "link_settings": {
           "libraries": [

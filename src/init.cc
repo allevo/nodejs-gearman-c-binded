@@ -5,6 +5,7 @@
 
 
 #include "WrapGearmanClient.h"
+#include "WrapGearmanWorker.h"
 #include "BackgroundTask.h"
 #include "functions.h"
 
@@ -97,6 +98,7 @@ void defineFunctions(Handle<Object> exports) {
 
 void InitAll(Handle<Object> exports, Handle<Object> module) {
 	WrapGearmanClient::Init(exports);
+	WrapGearmanWorker::Init(exports);
 	BackgroundTask::Init(exports);
 	defineConstants(exports);
 	defineFunctions(exports);

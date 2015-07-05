@@ -2,7 +2,6 @@
 
 var fromNative = require('./build/Release/gearmannodeCBinded');
 
-console.log(fromNative.LIBGEARMAN_VERSION_STRING);
 
 function GearmanClient() {
   this.tasks = [];
@@ -49,7 +48,28 @@ GearmanClient.prototype.getStatus = function(handle, callback) {
   });
 };
 
+function GearmanWorker() {
+  this.wrapGearmanWorker = new fromNative.WrapGearmanWorker();
+}
+
+GearmanWorker.prototype.addServer = function(host, port) {
+  this.wrapGearmanWorker.addServer(host, port);
+};
+
+GearmanWorker.prototype.addFunction = function(queue, callback) {
+  this.wrapGearmanWorker.addFunction(queue, callback);
+};
+
+GearmanWorker.prototype.start = function() {
+  this.wrapGearmanWorker.start();
+};
+
+GearmanWorker.prototype.stop = function(callback) {
+  this.wrapGearmanWorker.stop(callback);
+};
+
+module.exports.GearmanClient = GearmanClient;
+module.exports.GearmanWorker = GearmanWorker;
 for(var k in fromNative) {
   module.exports[k] = fromNative[k];
 }
-module.exports.GearmanClient = GearmanClient;
