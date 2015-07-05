@@ -49,8 +49,7 @@ public:
 	}
 
 	void HandleProgressCallback(const char *data, size_t size) {
-		gClient->debug && printf("%s %s\n", "DI QUA", data);
-		gClient->debug && printf("%d\n", (int) gClient->tasks.size());
+		gClient->debug && printf("Calling %d task callbacks\n", (int) gClient->tasks.size());
 		int n = gClient->tasks.size();
 		list<Baton*>::iterator it = gClient->tasks.begin();
 
@@ -58,7 +57,7 @@ public:
 			Baton* el = *it;
 			if (!el->isDone()) { continue; }
 			el->invokeCallback();
-			gClient->debug && printf("%s\n", "QQQQQQQQQQQQQQ");
+			gClient->debug && printf("%s\n", "callback invoked");
 			gClient->tasks.remove(el);
 
 			it++;
@@ -148,6 +147,10 @@ NAN_METHOD(WrapGearmanClient::addServer) {
 	NanReturnValue(NanNew<Boolean>(gearman_success(ret)));
 }
 
+void log(const char *line, gearman_verbose_t verbose, void *context) {
+	printf("%s %s\n", gearman_verbose_name(verbose), line);
+}
+
 NAN_METHOD(WrapGearmanClient::setDebug) {
 	NanScope();
 
@@ -155,6 +158,8 @@ NAN_METHOD(WrapGearmanClient::setDebug) {
 	if (args.Length() == 1) {
 		gClient->debug = args[0]->BooleanValue();
 	}
+
+	gearman_client_set_log_fn(gClient->client, log, NULL, GEARMAN_VERBOSE_MAX);
 
 	NanReturnValue(NanNew<Boolean>(true));
 }

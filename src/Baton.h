@@ -28,13 +28,14 @@ public:
 		callback->Call(0, argv);
 	}
 
+	virtual ~Baton() {
+		delete callback;
+	}
+
 protected:
 	explicit Baton(NanCallback* callback_)
 		: callback(callback_), done(false) { }
 
-	~Baton() {
-		delete callback;
-	}
 
 	NanCallback* callback;
 
@@ -48,7 +49,7 @@ public:
 	explicit JobBackgroundBaton(BackgroundTask* task_, NanCallback* callback_)
 		: Baton(callback_), task(task_) { }
 
-	~JobBackgroundBaton() {
+	virtual ~JobBackgroundBaton() {
 		delete task;
 	}
 
@@ -68,7 +69,7 @@ public:
 		strcpy(handle, handle_);
 	}
 
-	~JobStatusBaton() {
+	virtual ~JobStatusBaton() {
 		delete handle;
 	}
 
