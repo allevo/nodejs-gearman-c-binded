@@ -41,7 +41,7 @@ public:
 				if (el->isDone()) { continue; }
 				el->Execute(gClient);
 				el->setToDone();
-
+break;
 				if (!el->isOk()) {
 					break;
 				}
