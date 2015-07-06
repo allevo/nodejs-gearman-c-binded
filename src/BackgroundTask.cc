@@ -63,6 +63,7 @@ NAN_METHOD(BackgroundTask::New) {
 
 	BackgroundTask* gTask = new BackgroundTask(*queue, *data, args[2]->IsNull() ? NULL : *unique);
 	gTask->done = false;
+	gTask->ret = (gearman_return_t) -1;
 	gTask->Wrap(args.This());
 
 	NanReturnValue(args.This());

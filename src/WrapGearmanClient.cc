@@ -12,6 +12,9 @@ using namespace std;
 
 Persistent<Function> WrapGearmanClient::constructor;
 
+bool foo(const Baton* item) {
+	return item->isDone();
+}
 
 class MyExecute : public NanAsyncProgressWorker {
 public:
@@ -26,15 +29,24 @@ public:
 			gClient->debug && printf("%s\n", "-- sleeping...");
 			usleep(500);
 			gClient->debug && printf("%s\n", "-- unslept");
+
+			if (uv_mutex_trylock(&gClient->client_mutex) != 0) {
+				continue;
+			}
+
 			gClient->debug && printf("%s %d\n", "-- size:", (int) gClient->tasks.size());
 
 			for(list<Baton*>::iterator it = gClient->tasks.begin(); it != gClient->tasks.end(); it ++) {
 				Baton* el = *it;
 				if (el->isDone()) { continue; }
+				el->Execute(gClient);
 				el->setToDone();
 
-				el->Execute(gClient);
+				if (!el->isOk()) {
+					break;
+				}
 			}
+			gClient->unlockClient();
 
 			gClient->debug && printf("%s\n", "-- seding...");
 			progress.Send(NULL, 0);
@@ -50,23 +62,29 @@ public:
 
 	void HandleProgressCallback(const char *data, size_t size) {
 		gClient->debug && printf("Calling %d task callbacks\n", (int) gClient->tasks.size());
-		int n = gClient->tasks.size();
-		list<Baton*>::iterator it = gClient->tasks.begin();
 
-		for (int i = 0; i < n ; i ++ ) {
-			Baton* el = *it;
+		Baton* el;
+		gClient->lockClient();
+		for (list<Baton*>::iterator it = gClient->tasks.begin(); it != gClient->tasks.end(); it++) {
+			el = *it;
 			if (!el->isDone()) { continue; }
 			el->invokeCallback();
 			gClient->debug && printf("%s\n", "callback invoked");
-			gClient->tasks.remove(el);
-
-			it++;
 		}
+		gClient->tasks.remove_if(foo);
+		gClient->unlockClient();
+		/*
+		for (list<Baton*>:	:iterator it = toRemove.begin(); it != toRemove.end(); it++) {
+			gClient->tasks.remove(*it);
+		}
+		*/
 	}
 };
 
 WrapGearmanClient::WrapGearmanClient() {
 	client = gearman_client_create(NULL);
+	gearman_client_set_timeout(client, 1000);
+
 	uv_mutex_init(&client_mutex);
 	debug = false;
 	running = true;

@@ -16,10 +16,12 @@ describe('client', function () {
     beforeEach(function() {
       client = new GearmanClient();
       client.addServer('127.0.0.1', 4731);
+      // client.setDebug(true);
     });
     afterEach(function(done) {
       client.stop(done);
     });
+
     it('should store the data on gearman', function (done) {
       var job = client.doBackground('queue', 'data', 'unique', function(err) {
         assert.ifError(err);
@@ -120,6 +122,27 @@ describe('client', function () {
           });
         });
       });
+    });
+
+    it('should allow queue more than one event', function (done) {
+      var n = 100;
+      var i = 0;
+      function callback(err) {
+
+        assert.ifError(err);
+        i++;
+
+        if (i === n) {
+          done();
+        }
+      }
+
+      for(var j = 0; j < n; j++) {
+        var k = j;
+        setTimeout(function() {
+          client.doBackground('queue', 'data' + k, 'unique' + k, callback);
+        }, 10);
+      }
     });
   });
 

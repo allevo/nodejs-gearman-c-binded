@@ -21,6 +21,7 @@ function startGearmanServer(done) {
   }
   gearmanProcess.stderr.on('data', cb.bind(null, 'stderr'));
   gearmanProcess.on('exit', cb.bind(null, 'exit'));
+  // gearmanProcess.on('exit', console.log.bind(console, 'AAAAAAAAAAAAA'));
 }
 
 function stopGearmanServer(done) {

@@ -15,12 +15,16 @@ class Baton {
 public:
 	virtual void Execute(WrapGearmanClient* client) = 0;
 
-	bool isDone() {
+	bool isDone() const {
 		return done;
 	}
 
 	void setToDone() {
 		done = true;
+	}
+
+	bool isOk() const {
+		return this->_isOk;
 	}
 
 	virtual void invokeCallback() {
@@ -37,10 +41,15 @@ protected:
 		: callback(callback_), done(false) { }
 
 
+	void setResult(bool isOk) {
+		this->_isOk = isOk;
+	}
+
 	NanCallback* callback;
 
 private:
 	bool done;
+	bool _isOk;
 };
 
 class JobBackgroundBaton : public Baton {
